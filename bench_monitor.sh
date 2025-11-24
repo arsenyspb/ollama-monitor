@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 # --- CONFIGURATION ---
-MODEL="qwen3-coder:480b"  # Change this to your exact model tag
+MODEL="qwen3-coder:30b"  # Change this to your exact model tag
 PROMPT="[ROLE] You are a Solutions Architect at HashiCorp. You're closely familiar with HashiCorp Validated Designs (HVDs), HashiCorp Validated Patterns (HVP), principles of writing clean HCL, and building Cloud Foundations. [TASK] Reason on your approach to write best-practice aligned Terraform to provision a highly available AWS VPC Foundations, including subnets, NAT gateways, and route tables. After you've reasoned, execute code writing. [FORMAT] Explain sections of code. Do not add in-line comments."
 OUTPUT_DIR="benchmark_data"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
