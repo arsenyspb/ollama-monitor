@@ -1,15 +1,15 @@
 # Ollama Benchmark Monitor
 
-A shell script to benchmark Ollama model performance while monitoring system resource utilization on macOS.
+A set of shell scripts to benchmark and continuously monitor Ollama model performance and system resource utilization on macOS.
 
 ## Description
 
-This script executes a benchmark test for a specified Ollama model. While the model is running an inference task, the script monitors system metrics including:
-- CPU Usage (%)
-- GPU Power (mW)
-- RAM Usage (GB)
+This repository provides tools to track hardware usage (CPU, GPU, RAM) and tokens-per-second (TPS) while running Ollama on macOS. It includes:
+- **Benchmark Monitor:** Executes a single prompt and measures performance metrics.
+- **Continuous Monitor:** Runs in the background as a daemon to continuously log system metrics and inference speeds.
 
-Upon completion, it measures the model's performance (tokens/second) and generates a detailed Markdown report and logs data to a summary CSV file.
+## AI Co-Development Guidelines
+This project supports AI-assisted development. Please refer to [AI.md](AI.md) for guidelines on how AI agents should interact with this repository (Issue-driven development, PR workflows, and CI/CD).
 
 ## Prerequisites
 
@@ -20,6 +20,8 @@ ollama serve
 
 ## Usage
 
+### 1. Benchmark Testing
+
 To run the benchmark, execute the script from your terminal with a run type argument.
 
 ```shell
@@ -29,6 +31,21 @@ To run the benchmark, execute the script from your terminal with a run type argu
 -   `dirty`: Intended for a run under normal system load.
 
 The script requires `sudo` privileges to access `powermetrics` for GPU statistics.
+
+### 2. Continuous Monitoring
+
+To start the continuous monitoring daemon in the background:
+```shell
+make monitor-start
+```
+*Note: This will prompt for your `sudo` password to access GPU metrics.*
+
+To stop the continuous monitor:
+```shell
+make monitor-stop
+```
+
+> **Current Limitation (TPS Tracking):** The continuous monitor currently tracks CPU, GPU, and RAM. It cannot capture Tokens-Per-Second (TPS) for API-based background inference (e.g. from external clients) because Ollama does not log generation stats to its server log. We are planning to introduce a thin proxy to intercept and log these metrics globally.
 
 ## Configuration
 
