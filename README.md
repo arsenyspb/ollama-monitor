@@ -15,7 +15,7 @@ To view a real-time TUI (Text User Interface) plotting the continuous metrics in
 make dashboard
 ```
 
-![Ollama Monitor Dashboard](img/ollama-monitor-dashboard.png)
+![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
 
