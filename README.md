@@ -1,6 +1,6 @@
 # Ollama Benchmark Monitor
 
-A set of shell scripts to benchmark and continuously monitor Ollama model performance and system resource utilization on macOS.
+A set of handy shell scripts to benchmark and continuously monitor Ollama models performance and system resource utilization on macOS.
 
 ## Description
 
@@ -8,15 +8,16 @@ This repository provides tools to track hardware usage (CPU, GPU, RAM) and token
 - **Benchmark Monitor:** Executes a single prompt and measures performance metrics.
 - **Continuous Monitor:** Runs in the background as a daemon to continuously log system metrics and inference speeds.
 
-## AI Co-Development Guidelines
-This project supports AI-assisted development. Please refer to [AI.md](AI.md) for guidelines on how AI agents should interact with this repository (Issue-driven development, PR workflows, and CI/CD).
+### Interactive Dashboard
 
-## Prerequisites
-
-Ensure the Ollama service is running before executing the script. You can start it with the following command:
+To view a real-time TUI (Text User Interface) plotting the continuous metrics in your terminal (requires the continuous monitor to be running):
 ```shell
-ollama serve
+make dashboard
 ```
+
+![Ollama Monitor Dashboard](img/ollama-monitor-dashboard.png)
+*Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
+
 
 ## Usage
 
@@ -45,7 +46,7 @@ To stop the continuous monitor:
 make monitor-stop
 ```
 
-### 3. TPS Proxy (Zero-Configuration)
+### 3. TPS Proxy (Zero-Configuration and safe rollback)
 
 To capture Tokens-Per-Second (TPS) for background API inference, you can start the thin TPS proxy. This will automatically reconfigure your actual Ollama server to run on a background port (`11435`) and place the proxy on the default port (`11434`), allowing your existing client tools to work with zero configuration changes.
 
@@ -66,19 +67,10 @@ To stop the proxy and restore Ollama to its default configuration:
 make tps-proxy-stop
 ```
 
-### 4. Interactive Dashboard
 
-To view a real-time TUI (Text User Interface) plotting the continuous metrics in your terminal (requires the continuous monitor to be running):
-```shell
-make dashboard
-```
+## 4. Configuration
 
-![Ollama Monitor Dashboard](img/ollama-monitor-dashboard.png)
-*Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
-
-## Configuration
-
-The script is configured via variables at the top of the file.
+When ran in script mode, it is configured via variables at the top of the file.
 
 -   `MODEL`: The Ollama model tag to benchmark (e.g., `qwen3-coder:30b`).
 -   `PROMPT`: The input prompt for the model. As a shortcut, this is a hard-coded zero-shot prompt. For more advanced use cases, this can be externalized to be read from a file or command-line argument.
@@ -91,3 +83,8 @@ The script generates the following files in the specified `OUTPUT_DIR`:
 -   **Markdown Report** (`benchmark_report_[type]_[timestamp].md`): A detailed report containing performance metrics, system resource usage summaries, and the full model output.
 -   **System Metrics CSV** (`system_metrics_[type]_[timestamp].csv`): Raw time-series data of CPU, GPU, and RAM usage during the run.
 -   **Summary CSV** (`benchmark_summary.csv`): A log file that appends a summary of each benchmark run, including performance and configuration details.
+
+
+## AI Co-Development Guidelines
+This project supports AI-assisted development. Please refer to [AI.md](AI.md) for guidelines on how AI agents should interact with this repository (Issue-driven development, PR workflows, and CI/CD).
+
