@@ -25,7 +25,7 @@ ollama serve
 To run the benchmark, execute the script from your terminal with a run type argument.
 
 ```shell
-./bench_monitor.sh [clean|dirty]
+./src/bench_monitor.sh [clean|dirty]
 ```
 -   `clean`: Intended for a run on a system with minimal background processes.
 -   `dirty`: Intended for a run under normal system load.
@@ -45,7 +45,36 @@ To stop the continuous monitor:
 make monitor-stop
 ```
 
-> **Current Limitation (TPS Tracking):** The continuous monitor currently tracks CPU, GPU, and RAM. It cannot capture Tokens-Per-Second (TPS) for API-based background inference (e.g. from external clients) because Ollama does not log generation stats to its server log. We are planning to introduce a thin proxy to intercept and log these metrics globally.
+### 3. TPS Proxy (Zero-Configuration)
+
+To capture Tokens-Per-Second (TPS) for background API inference, you can start the thin TPS proxy. This will automatically reconfigure your actual Ollama server to run on a background port (`11435`) and place the proxy on the default port (`11434`), allowing your existing client tools to work with zero configuration changes.
+
+> **⚠️ Important Notice Regarding Live TPS Updates:**
+> Ollama's API streams generated text continuously, but it **only emits performance statistics (`eval_count` and `eval_duration`) in the very last JSON chunk** when the generation is completely finished.
+> Because of this architectural design, the proxy cannot calculate a "live" TPS. The TPS value in the monitor will remain `0` while the model is loading and generating text. You will only see the TPS spike logged at the exact moment the generation finishes.
+>
+> **Note on Large Models:** If you are running massive models (e.g., a 22B parameter model like Mixtral on a laptop) that spill into system RAM and generate text extremely slowly (e.g., 1 word per minute), you will not see *any* TPS reading until all requested words have finally finished generating, which could take a very long time.
+
+To start the proxy:
+```shell
+make tps-proxy-start
+```
+*Note: On Linux, this will require `sudo` to configure systemd.*
+
+To stop the proxy and restore Ollama to its default configuration:
+```shell
+make tps-proxy-stop
+```
+
+### 4. Interactive Dashboard
+
+To view a real-time TUI (Text User Interface) plotting the continuous metrics in your terminal (requires the continuous monitor to be running):
+```shell
+make dashboard
+```
+
+![Ollama Monitor Dashboard](img/ollama-monitor-dashboard.png)
+*Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
 ## Configuration
 
