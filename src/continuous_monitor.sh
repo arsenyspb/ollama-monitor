@@ -47,8 +47,8 @@ monitor_system() {
         SYS_CPU=$(echo "$CPU_STATS" | awk '{print $5}' | sed 's/%//')
         CPU_LOAD=$(echo "$USER_CPU + $SYS_CPU" | bc 2>/dev/null || echo "0")
         
-        # 2. GPU Power
-        GPU_POWER=$(sudo powermetrics --samplers gpu_power -n 1 -i 100 2>/dev/null | grep "GPU Power" | awk '{print $3}' || echo "0")
+        # 2. GPU Load
+        GPU_POWER=$(sudo powermetrics --samplers gpu_power -n 1 -i 100 2>/dev/null | grep "GPU HW active residency:" | awk '{print $5}' | sed 's/%//' || echo "0")
         
         # 3. RAM Usage
         PAGES_ACTIVE=$(vm_stat | grep "Pages active" | awk '{print $3}' | sed 's/\.//')

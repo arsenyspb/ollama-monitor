@@ -68,10 +68,11 @@ def draw_dashboard():
     plt.ylim(0, 100)
     plt.xticks(x, times)
     
-    # 1, 2: GPU Power
+    # 1, 2: GPU Load
     plt.subplot(1, 2)
-    plt.title("GPU Power (mW)")
+    plt.title("GPU Load (%)")
     plt.plot(x, gpu, color="red")
+    plt.ylim(0, 100)
     plt.xticks(x, times)
     
     # 2, 1: RAM Usage
