@@ -6,6 +6,7 @@ import os
 import signal
 import sys
 import argparse
+import time
 
 FORWARD_HOST = '127.0.0.1'
 TPS_FILE = '/tmp/ollama_current_tps'
@@ -21,8 +22,15 @@ def extract_tps_from_line(line):
                 return count / (duration_ns / 1e9)
     return None
 
-def forward_data(src, dst, is_response=False):
+def forward_data(src, dst, is_response=False, state=None):
+    if state is None:
+        state = {}
+        
     buffer = ""
+    first_chunk_time = None
+    chunk_count = 0
+    last_update_time = None
+    
     try:
         while True:
             data = src.recv(8192)
@@ -30,6 +38,9 @@ def forward_data(src, dst, is_response=False):
                 break
             dst.sendall(data)
             
+            if not is_response and state.get('request_start') is None:
+                state['request_start'] = time.time()
+                
             if is_response:
                 try:
                     text = data.decode('utf-8', errors='ignore')
@@ -38,10 +49,60 @@ def forward_data(src, dst, is_response=False):
                     # Process complete lines
                     while '\n' in buffer:
                         line, buffer = buffer.split('\n', 1)
+                        
+                        # Ollama Native API TPS
                         tps = extract_tps_from_line(line)
                         if tps is not None:
                             with open(TPS_FILE, 'w') as f:
                                 f.write(f"{tps:.2f}\n")
+                                
+                        # OpenAI API Stream tracking
+                        if '"object":"chat.completion.chunk"' in line:
+                            current_time = time.time()
+                            if first_chunk_time is None:
+                                first_chunk_time = current_time
+                                chunk_count = 0
+                                last_update_time = current_time
+                                
+                            if '"usage"' in line and '"completion_tokens"' in line:
+                                match = re.search(r'"completion_tokens"\s*:\s*(\d+)', line)
+                                if match:
+                                    chunk_count = int(match.group(1))
+                            elif '"content"' in line:
+                                chunk_count += 1
+                                
+                            # Continuously update TPS during generation
+                            if chunk_count > 0 and (current_time - last_update_time >= 0.2):
+                                duration = current_time - first_chunk_time
+                                if duration > 0:
+                                    tps = chunk_count / duration
+                                    with open(TPS_FILE, 'w') as f:
+                                        f.write(f"{tps:.2f}\n")
+                                    last_update_time = current_time
+                                
+                        # End of OpenAI Stream
+                        if line.strip() == "data: [DONE]" and first_chunk_time is not None:
+                            duration = time.time() - first_chunk_time
+                            if duration > 0 and chunk_count > 0:
+                                tps = chunk_count / duration
+                                with open(TPS_FILE, 'w') as f:
+                                    f.write(f"{tps:.2f}\n")
+                            first_chunk_time = None
+                            chunk_count = 0
+                            last_update_time = None
+                            state['request_start'] = None
+                            
+                        # Non-streaming OpenAI API
+                        if '"object":"chat.completion"' in line and '"usage"' in line and '"completion_tokens"' in line:
+                            match = re.search(r'"completion_tokens"\s*:\s*(\d+)', line)
+                            if match and state.get('request_start') is not None:
+                                completion_tokens = int(match.group(1))
+                                duration = time.time() - state['request_start']
+                                if duration > 0 and completion_tokens > 0:
+                                    tps = completion_tokens / duration
+                                    with open(TPS_FILE, 'w') as f:
+                                        f.write(f"{tps:.2f}\n")
+                                state['request_start'] = None
                                         
                     # Safety limit for buffer in case of non-newline streaming
                     if len(buffer) > 65536:
@@ -70,8 +131,10 @@ def handle_client(client_socket, forward_port):
         client_socket.close()
         return
 
-    client_to_server = threading.Thread(target=forward_data, args=(client_socket, server_socket, False))
-    server_to_client = threading.Thread(target=forward_data, args=(server_socket, client_socket, True))
+    state = {'request_start': None}
+
+    client_to_server = threading.Thread(target=forward_data, args=(client_socket, server_socket, False, state))
+    server_to_client = threading.Thread(target=forward_data, args=(server_socket, client_socket, True, state))
 
     client_to_server.daemon = True
     server_to_client.daemon = True

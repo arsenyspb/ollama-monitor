@@ -70,7 +70,7 @@ tps-proxy-stop:
 		open -a Ollama || true; \
 	fi
 
-dashboard:
+dashboard: monitor-start tps-proxy-start
 	@echo "Ensuring plotext is installed..."
 	@python3 -c "import plotext" || pip3 install plotext==5.2.8
 	@echo "Starting TUI dashboard..."
