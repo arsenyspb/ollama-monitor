@@ -1,5 +1,9 @@
 # Ollama Benchmark Monitor
 
+[![Python Tests](https://github.com/arsenyspb/ollama-monitor/actions/workflows/test.yml/badge.svg)](https://github.com/arsenyspb/ollama-monitor/actions/workflows/test.yml)
+[![Python Version](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 A set of handy shell scripts to benchmark and continuously monitor Ollama models performance and system resource utilization on macOS.
 
 ## Description
