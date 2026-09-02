@@ -11,12 +11,43 @@ TPS_FILE="/tmp/ollama_current_tps"
 
 # Initialize CSV Headers
 if [ ! -f "$METRICS_FILE" ]; then
-    echo "Timestamp,CPU_Usage_%,GPU_Power_mW,RAM_Used_GB,Eval_TPS" > "$METRICS_FILE"
+    echo "Timestamp,CPU_Usage_%,GPU_Power_mW,RAM_Used_GB,Eval_TPS,Model_Name,Model_Metadata" > "$METRICS_FILE"
 fi
 
 echo "--- Starting Continuous Monitor ---"
 echo "Monitoring system metrics and Ollama tokens-per-second..."
 echo "Press Ctrl+C or run 'make monitor-stop' to stop."
+
+# --- MODEL METADATA EXTRACTOR ---
+cat << 'EOF' > /tmp/get_ollama_model.py
+import urllib.request
+import json
+import sys
+
+try:
+    # Use 11434, but fallback to 11435 if proxy is running
+    port = 11434
+    req = urllib.request.Request(f"http://127.0.0.1:{port}/api/ps")
+    with urllib.request.urlopen(req, timeout=0.5) as response:
+        data = json.loads(response.read())
+        models = data.get("models", [])
+        if models:
+            m = models[0]
+            name = m.get("name", "Unknown")
+            details = m.get("details", {})
+            param_size = details.get("parameter_size", "?")
+            quant = details.get("quantization_level", "?")
+            
+            size_bytes = m.get("size", 0)
+            size_gb = size_bytes / (1024**3)
+            size_str = f"{size_gb:.1f}GB"
+            
+            print(f"{name},{param_size}|{quant}|{size_str}")
+        else:
+            print("None,None")
+except Exception:
+    print("None,None")
+EOF
 
 # --- OLLAMA LOG TAILER (TPS) ---
 # Tails the Ollama server log to capture eval_count and eval_duration
@@ -58,7 +89,10 @@ monitor_system() {
         # 4. Read latest TPS
         LATEST_TPS=$(cat "$TPS_FILE" 2>/dev/null || echo "0")
 
-        echo "$TS,$CPU_LOAD,$GPU_POWER,$RAM_GB,$LATEST_TPS" >> "$METRICS_FILE"
+        # 5. Get Model Info
+        MODEL_INFO=$(python3 /tmp/get_ollama_model.py 2>/dev/null || echo "None,None")
+
+        echo "$TS,$CPU_LOAD,$GPU_POWER,$RAM_GB,$LATEST_TPS,$MODEL_INFO" >> "$METRICS_FILE"
         
         # Reset TPS file after reporting so it goes back to 0 when idle
         echo "0" > "$TPS_FILE"

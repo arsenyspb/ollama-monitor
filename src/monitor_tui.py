@@ -14,13 +14,13 @@ MAX_POINTS = 60 # Show last 60 seconds of data
 
 def read_data():
     if not os.path.exists(CSV_FILE):
-        return [], [], [], [], []
+        return [], [], [], [], [], "None", "None"
     
     try:
         with open(CSV_FILE, 'r') as f:
             lines = f.readlines()[1:] # Skip header
     except Exception:
-        return [], [], [], [], []
+        return [], [], [], [], [], "None", "None"
 
     # Get last MAX_POINTS lines
     lines = lines[-MAX_POINTS:]
@@ -30,11 +30,13 @@ def read_data():
     gpu = []
     ram = []
     tps = []
+    last_model_name = "None"
+    last_model_meta = "None"
     
     for line in lines:
         parts = line.strip().split(',')
-        if len(parts) == 5:
-            t, c, g, r, p = parts
+        if len(parts) >= 5:
+            t, c, g, r, p = parts[:5]
             try:
                 times.append(t)
                 cpu.append(float(c))
@@ -43,22 +45,39 @@ def read_data():
                 tps.append(float(p))
             except ValueError:
                 continue
+            
+            if len(parts) >= 7:
+                last_model_name = parts[5]
+                last_model_meta = parts[6]
                 
-    return times, cpu, gpu, ram, tps
+    return times, cpu, gpu, ram, tps, last_model_name, last_model_meta
 
 def draw_dashboard():
     plt.clear_terminal()
     plt.theme("clear")
     
-    times, cpu, gpu, ram, tps = read_data()
+    times, cpu, gpu, ram, tps, model_name, model_meta = read_data()
     
     if not times:
         print(f"Waiting for data in {CSV_FILE}...")
         return
 
+    # Render Top Row Outlook
+    if model_name != "None":
+        print(f"\033[1m\033[96mCURRENT OLLAMA MODEL:\033[0m {model_name} \033[90m[{model_meta}]\033[0m\n")
+    else:
+        print("\033[1m\033[91mCURRENT OLLAMA MODEL:\033[0m No model currently loaded\n")
+
     # Use generic indices for x-axis to avoid overlapping time labels if too many
     x = list(range(len(times)))
     
+    # Adjust plot size to prevent terminal from scrolling and overwriting the top text
+    try:
+        w, h = plt.terminal_size()
+        plt.plotsize(w, h - 3)
+    except Exception:
+        pass
+        
     plt.subplots(2, 2)
     
     # 1, 1: CPU Usage
