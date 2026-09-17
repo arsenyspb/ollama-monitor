@@ -1,0 +1,23 @@
+name: flow Trigger
+
+on:
+  issues:
+    types: [labeled]
+
+jobs:
+  forward:
+    if: startsWith(github.event.label.name, 'flow:')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Forward to central orchestrator
+        env:
+          DISPATCH_TOKEN: ${{ secrets.FLOW_DISPATCH_TOKEN }}
+        run: |
+          curl -sf -X POST \
+            -H "Authorization: Bearer $DISPATCH_TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/arsenyspb/atobar-flow/dispatches \
+            -d '{"event_type":"flow_run","client_payload":{
+                  "target_repo":"${{ github.repository }}",
+                  "issue_id":${{ github.event.issue.number }},
+                  "label":"${{ github.event.label.name }}"}}'
