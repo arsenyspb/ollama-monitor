@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    {
+      "status": "in_progress",
+      "content": "Run onboard_repo.py to generate architecture wiki"
+    },
+    {
+      "status": "pending",
+      "content": "Commit and open PR"
+    }
+  ]
+}
