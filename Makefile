@@ -28,7 +28,7 @@ tps-proxy-start:
 			echo '[Service]' | sudo tee /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \
 			echo 'Environment="OLLAMA_HOST=127.0.0.1:11435"' | sudo tee -a /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \
 			sudo systemctl daemon-reload; \
-			sudo systemctl restart ollama; \
+			sudo systemctl restart ollama || true; \
 		else \
 			echo "OLLAMA_HOST already set to $$OLLAMA_HOST, skipping systemd override."; \
 		fi \
@@ -72,7 +72,7 @@ tps-proxy-stop:
 
 dashboard: monitor-start tps-proxy-start
 	@echo "Ensuring plotext is installed..."
-	@python3 -c "import plotext" || pip3 install plotext==5.2.8
+	@python3 -c "import plotext" || pip3 install --break-system-packages plotext==5.2.8
 	@echo "Starting TUI dashboard..."
 	@python3 ./src/monitor_tui.py
 
