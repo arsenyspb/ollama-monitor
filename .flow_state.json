@@ -1,0 +1,20 @@
+{
+  "tasks": [
+    {
+      "content": "Read index.html",
+      "status": "completed"
+    },
+    {
+      "status": "completed",
+      "content": "Change red box width to 100%"
+    },
+    {
+      "status": "in_progress",
+      "content": "Verify with inspect_ui"
+    },
+    {
+      "status": "pending",
+      "content": "Create PR"
+    }
+  ]
+}
