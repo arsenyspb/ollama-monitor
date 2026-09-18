@@ -1,16 +1,16 @@
 {
   "tasks": [
     {
-      "status": "completed",
-      "content": "Check Makefile for make dashboard command"
+      "content": "Check Makefile for make dashboard command",
+      "status": "completed"
     },
     {
-      "status": "in_progress",
-      "content": "Run make dashboard in xterm"
+      "content": "Run make dashboard in xterm",
+      "status": "completed"
     },
     {
-      "status": "pending",
-      "content": "Use inspect_ui to verify the TUI dashboard"
+      "content": "Use inspect_ui to verify the TUI dashboard",
+      "status": "in_progress"
     },
     {
       "content": "Create PR with verification results",
