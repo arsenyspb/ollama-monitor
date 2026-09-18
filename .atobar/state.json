@@ -2,15 +2,15 @@
   "tasks": [
     {
       "content": "Attempt to run make dashboard in xterm",
-      "status": "in_progress"
+      "status": "completed"
     },
     {
       "content": "Record limitation in PR body if xterm/X11 tools are missing",
-      "status": "pending"
+      "status": "completed"
     },
     {
-      "content": "Open PR",
-      "status": "pending"
+      "status": "in_progress",
+      "content": "Open PR"
     }
   ]
 }
