@@ -1,0 +1,20 @@
+{
+  "tasks": [
+    {
+      "status": "in_progress",
+      "content": "Understand the issue: Generate SOTA'26 compliant architecture wiki for this repository using onboard_repo.py. Use pydantic-based structured schema and ripgrep."
+    },
+    {
+      "content": "Modify onboard_repo.py to use pydantic-based structured schema and ripgrep.",
+      "status": "pending"
+    },
+    {
+      "status": "pending",
+      "content": "Run onboard_repo.py to generate the wiki."
+    },
+    {
+      "content": "Create a PR with the generated wiki and the changes to onboard_repo.py.",
+      "status": "pending"
+    }
+  ]
+}
