@@ -73,18 +73,38 @@ monitor_system() {
         TS=$(date +"%H:%M:%S")
         
         # 1. CPU Load
-        CPU_STATS=$(top -l 1 | grep "CPU usage")
-        USER_CPU=$(echo "$CPU_STATS" | awk '{print $3}' | sed 's/%//')
-        SYS_CPU=$(echo "$CPU_STATS" | awk '{print $5}' | sed 's/%//')
-        CPU_LOAD=$(echo "$USER_CPU + $SYS_CPU" | bc 2>/dev/null || echo "0")
+        if command -v top >/dev/null 2>&1 && top -b -n 1 >/dev/null 2>&1; then
+            # Linux top
+            CPU_LOAD=$(top -b -n 1 | grep "Cpu(s)" | awk '{print $2 + $4}')
+        else
+            # macOS top
+            CPU_STATS=$(top -l 1 2>/dev/null | grep "CPU usage" || echo "")
+            if [ -n "$CPU_STATS" ]; then
+                USER_CPU=$(echo "$CPU_STATS" | awk '{print $3}' | sed 's/%//')
+                SYS_CPU=$(echo "$CPU_STATS" | awk '{print $5}' | sed 's/%//')
+                CPU_LOAD=$(echo "$USER_CPU + $SYS_CPU" | bc 2>/dev/null || echo "0")
+            else
+                CPU_LOAD="0"
+            fi
+        fi
         
         # 2. GPU Load
-        GPU_POWER=$(sudo powermetrics --samplers gpu_power -n 1 -i 100 2>/dev/null | grep "GPU HW active residency:" | awk '{print $5}' | sed 's/%//' || echo "0")
+        if command -v powermetrics >/dev/null 2>&1; then
+            GPU_POWER=$(sudo powermetrics --samplers gpu_power -n 1 -i 100 2>/dev/null | grep "GPU HW active residency:" | awk '{print $5}' | sed 's/%//' || echo "0")
+        else
+            GPU_POWER="0"
+        fi
         
         # 3. RAM Usage
-        PAGES_ACTIVE=$(vm_stat | grep "Pages active" | awk '{print $3}' | sed 's/\.//')
-        PAGES_WIRED=$(vm_stat | grep "Pages wired" | awk '{print $4}' | sed 's/\.//')
-        RAM_GB=$(echo "scale=2; ($PAGES_ACTIVE + $PAGES_WIRED) * 16384 / 1024 / 1024 / 1024" | bc 2>/dev/null || echo "0")
+        if command -v vm_stat >/dev/null 2>&1; then
+            PAGES_ACTIVE=$(vm_stat | grep "Pages active" | awk '{print $3}' | sed 's/\.//')
+            PAGES_WIRED=$(vm_stat | grep "Pages wired" | awk '{print $4}' | sed 's/\.//')
+            RAM_GB=$(echo "scale=2; ($PAGES_ACTIVE + $PAGES_WIRED) * 16384 / 1024 / 1024 / 1024" | bc 2>/dev/null || echo "0")
+        elif command -v free >/dev/null 2>&1; then
+            RAM_GB=$(free -g | awk '/^Mem:/{print $3}')
+        else
+            RAM_GB="0"
+        fi
 
         # 4. Read latest TPS
         LATEST_TPS=$(cat "$TPS_FILE" 2>/dev/null || echo "0")
