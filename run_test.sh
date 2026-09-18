@@ -8,7 +8,7 @@ export DISPLAY=:99
 sleep 1
 
 # Run xterm with make dashboard
-xterm -geometry 120x40 -e "make dashboard" &
+xterm -geometry 120x40 -e "PYTHONPATH=/home/ubuntu/.local/lib/python3.12/site-packages python3 ./src/monitor_tui.py" &
 XTERM_PID=$!
 
 # Give it some time to start and render
