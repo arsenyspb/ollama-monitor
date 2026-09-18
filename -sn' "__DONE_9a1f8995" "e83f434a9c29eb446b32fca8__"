@@ -1,0 +1,227 @@
+[33mcommit eb969f35080ee4f836fa3ede86fc1ab8f725e171[m
+Author: flow-agent <agent@atobar-flow.local>
+Date:   Fri Sep 18 04:36:02 2026 +0000
+
+    Auto-WIP state sync
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 6e10d29..d76b137 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -71,9 +71,9 @@[m [mtps-proxy-stop:[m
+ [m
+ dashboard: monitor-start tps-proxy-start[m
+ 	@echo "Ensuring plotext is installed..."[m
+[31m-	@python3 -c "import plotext" || pip3 install --break-system-packages plotext==5.2.8[m
+[32m+[m	[32m@python3 -c "import sys; sys.path.append('/home/ubuntu/.local/lib/python3.12/site-packages'); import plotext" || /usr/bin/python3 -m pip install --break-system-packages plotext==5.2.8[m
+ 	@echo "Starting TUI dashboard..."[m
+[31m-	@python3 ./src/monitor_tui.py[m
+[32m+[m	[32m@PYTHONPATH="/home/ubuntu/.local/lib/python3.12/site-packages:$$PYTHONPATH" python3 ./src/monitor_tui.py[m
+ [m
+ clean:[m
+ 	@echo "Cleaning up benchmark data..."[m
+
+[33mcommit b817d0f993e39808f7ee0627676eb6af72a2bc29[m
+Author: flow-agent <agent@atobar-flow.local>
+Date:   Fri Sep 18 04:34:59 2026 +0000
+
+    Auto-WIP state sync
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 6c90710..6e10d29 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -27,7 +27,7 @@[m [mtps-proxy-start:[m
+ 			echo '[Service]' | sudo tee /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \[m
+ 			echo 'Environment="OLLAMA_HOST=127.0.0.1:11435"' | sudo tee -a /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \[m
+ 			sudo systemctl daemon-reload; \[m
+[31m-			sudo systemctl restart ollama; \[m
+[32m+[m			[32msudo systemctl restart ollama || true; \[m
+ 		else \[m
+ 			echo "OLLAMA_HOST already set to $$OLLAMA_HOST, skipping systemd override."; \[m
+ 		fi \[m
+[36m@@ -60,7 +60,7 @@[m [mtps-proxy-stop:[m
+ 		if [ -f /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf ]; then \[m
+ 			sudo rm -f /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf; \[m
+ 			sudo systemctl daemon-reload; \[m
+[31m-			sudo systemctl restart ollama; \[m
+[32m+[m			[32msudo systemctl restart ollama || true; \[m
+ 		fi \[m
+ 	elif [ "$$OS" = "Darwin" ]; then \[m
+ 		launchctl unsetenv OLLAMA_HOST || true; \[m
+[36m@@ -71,7 +71,7 @@[m [mtps-proxy-stop:[m
+ [m
+ dashboard: monitor-start tps-proxy-start[m
+ 	@echo "Ensuring plotext is installed..."[m
+[31m-	@python3 -c "import plotext" || pip3 install plotext==5.2.8[m
+[32m+[m	[32m@python3 -c "import plotext" || pip3 install --break-system-packages plotext==5.2.8[m
+ 	@echo "Starting TUI dashboard..."[m
+ 	@python3 ./src/monitor_tui.py[m
+ [m
+
+[33mcommit 30e2feadeae5bb0fc98df28699a49db3589a7f87[m
+Author: flow-agent <agent@atobar-flow.local>
+Date:   Fri Sep 18 04:32:55 2026 +0000
+
+    Auto-WIP state sync
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 7ff9d13..6c90710 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -3,7 +3,6 @@[m
+ # Start the continuous monitor in the background[m
+ monitor-start:[m
+ 	@echo "Prompting for sudo password to read GPU stats via powermetrics..."[m
+[31m-	@sudo -v[m
+ 	@echo "Starting continuous monitor..."[m
+ 	@nohup ./src/continuous_monitor.sh > /dev/null 2>&1 &[m
+ [m
+
+[33mcommit 74e60c8c07d31f30be780bb090e4831ca8321cb1[m
+Author: Arseny Chernov <arseny.chernov@gmail.com>
+Date:   Tue Sep 1 19:07:19 2026 +0800
+
+    fix(proxy): continuous TPS updates for OpenAI streaming API
+    
+    This fixes the dashboard displaying zero TPS for OpenAI format chat requests by continuously updating the TPS file during the stream instead of waiting for the end of the request. Also adds a unit test for continuous TPS extraction over mock sockets.
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 5cd4b09..7ff9d13 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -70,7 +70,7 @@[m [mtps-proxy-stop:[m
+ 		open -a Ollama || true; \[m
+ 	fi[m
+ [m
+[31m-dashboard:[m
+[32m+[m[32mdashboard: monitor-start tps-proxy-start[m
+ 	@echo "Ensuring plotext is installed..."[m
+ 	@python3 -c "import plotext" || pip3 install plotext==5.2.8[m
+ 	@echo "Starting TUI dashboard..."[m
+
+[33mcommit 87a97c81f690f3c5a3298baf9ea1c4fee89c11a7[m
+Author: Arseny Chernov <arseny.chernov@gmail.com>
+Date:   Tue Sep 1 15:13:57 2026 +0800
+
+    feat: introduce TPS proxy, TUI dashboard, and tests
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mindex 9b8615f..5cd4b09 100644[m
+[1m--- a/Makefile[m
+[1m+++ b/Makefile[m
+[36m@@ -1,11 +1,11 @@[m
+[31m-.PHONY: monitor-start monitor-stop clean[m
+[32m+[m[32m.PHONY: monitor-start monitor-stop tps-proxy-start tps-proxy-stop dashboard clean[m
+ [m
+ # Start the continuous monitor in the background[m
+ monitor-start:[m
+ 	@echo "Prompting for sudo password to read GPU stats via powermetrics..."[m
+ 	@sudo -v[m
+ 	@echo "Starting continuous monitor..."[m
+[31m-	@nohup ./continuous_monitor.sh > /dev/null 2>&1 &[m
+[32m+[m	[32m@nohup ./src/continuous_monitor.sh > /dev/null 2>&1 &[m
+ [m
+ # Stop the continuous monitor[m
+ monitor-stop:[m
+[36m@@ -17,6 +17,65 @@[m [mmonitor-stop:[m
+ 		echo "Continuous monitor is not running or PID file is missing."; \[m
+ 	fi[m
+ [m
+[32m+[m[32m# Start the Ollama TPS proxy[m
+[32m+[m[32mtps-proxy-start:[m
+[32m+[m	[32m@echo "Configuring Ollama to run on 11435 and starting proxy on 11434..."[m
+[32m+[m	[32m@OS=$$(uname -s); \[m
+[32m+[m	[32mif [ "$$OS" = "Linux" ]; then \[m
+[32m+[m		[32mif [ -z "$$OLLAMA_HOST" ]; then \[m
+[32m+[m			[32mecho "Configuring systemd for Linux..."; \[m
+[32m+[m			[32msudo mkdir -p /etc/systemd/system/ollama.service.d; \[m
+[32m+[m			[32mecho '[Service]' | sudo tee /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \[m
+[32m+[m			[32mecho 'Environment="OLLAMA_HOST=127.0.0.1:11435"' | sudo tee -a /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf > /dev/null; \[m
+[32m+[m			[32msudo systemctl daemon-reload; \[m
+[32m+[m			[32msudo systemctl restart ollama; \[m
+[32m+[m		[32melse \[m
+[32m+[m			[32mecho "OLLAMA_HOST already set to $$OLLAMA_HOST, skipping systemd override."; \[m
+[32m+[m		[32mfi \[m
+[32m+[m	[32melif [ "$$OS" = "Darwin" ]; then \[m
+[32m+[m		[32mecho "Configuring launchctl for macOS..."; \[m
+[32m+[m		[32mlaunchctl setenv OLLAMA_HOST "127.0.0.1:11435"; \[m
+[32m+[m		[32mkillall Ollama || true; \[m
+[32m+[m		[32msleep 2; \[m
+[32m+[m		[32mopen -a Ollama; \[m
+[32m+[m	[32melse \[m
+[32m+[m		[32mecho "Unsupported OS: $$OS"; exit 1; \[m
+[32m+[m	[32mfi[m
+[32m+[m	[32m@echo "Starting Ollama proxy..."[m
+[32m+[m	[32m@nohup ./src/ollama_proxy.py --listen 11434 --forward 11435 > /dev/null 2>&1 &[m
+[32m+[m	[32m@echo $$! > /tmp/ollama_proxy.pid[m
+[32m+[m	[32m@echo "Proxy started. Clients can use default port 11434 with zero configuration."[m
+[32m+[m
+[32m+[m[32m# Stop the Ollama TPS proxy[m
+[32m+[m[32mtps-proxy-stop:[m
+[32m+[m	[32m@if [ -f /tmp/ollama_proxy.pid ]; then \[m
+[32m+[m		[32mecho "Stopping Ollama proxy (PID $$(cat /tmp/ollama_proxy.pid))..."; \[m
+[32m+[m		[32mkill -TERM $$(cat /tmp/ollama_proxy.pid) || true; \[m
+[32m+[m		[32mrm -f /tmp/ollama_proxy.pid; \[m
+[32m+[m	[32melse \[m
+[32m+[m		[32mecho "Ollama proxy is not running or PID file is missing."; \[m
+[32m+[m	[32mfi[m
+[32m+[m	[32m@echo "Restoring Ollama default configuration..."[m
+[32m+[m	[32m@OS=$$(uname -s); \[m
+[32m+[m	[32mif [ "$$OS" = "Linux" ]; then \[m
+[32m+[m		[32mif [ -f /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf ]; then \[m
+[32m+[m			[32msudo rm -f /etc/systemd/system/ollama.service.d/99-monitor-proxy.conf; \[m
+[32m+[m			[32msudo systemctl daemon-reload; \[m
+[32m+[m			[32msudo systemctl restart ollama; \[m
+[32m+[m		[32mfi \[m
+[32m+[m	[32melif [ "$$OS" = "Darwin" ]; then \[m
+[32m+[m		[32mlaunchctl unsetenv OLLAMA_HOST || true; \[m
+[32m+[m		[32mkillall Ollama || true; \[m
+[32m+[m		[32msleep 2; \[m
+[32m+[m		[32mopen -a Ollama || true; \[m
+[32m+[m	[32mfi[m
+[32m+[m
+[32m+[m[32mdashboard:[m
+[32m+[m	[32m@echo "Ensuring plotext is installed..."[m
+[32m+[m	[32m@python3 -c "import plotext" || pip3 install plotext==5.2.8[m
+[32m+[m	[32m@echo "Starting TUI dashboard..."[m
+[32m+[m	[32m@python3 ./src/monitor_tui.py[m
+[32m+[m
+ clean:[m
+ 	@echo "Cleaning up benchmark data..."[m
+ 	@rm -rf benchmark_data/[m
+
+[33mcommit f70a6a04e2442eb52ca8ec7804d1d2b2b0394162[m
+Author: Arseny Chernov <arseny.chernov@gmail.com>
+Date:   Tue Sep 1 07:28:22 2026 +0800
+
+    feat: Add continuous monitoring daemon and AI co-development guidelines
+
+[1mdiff --git a/Makefile b/Makefile[m
+[1mnew file mode 100644[m
+[1mindex 0000000..9b8615f[m
+[1m--- /dev/null[m
+[1m+++ b/Makefile[m
+[36m@@ -0,0 +1,22 @@[m
+[32m+[m[32m.PHONY: monitor-start monitor-stop clean[m
+[32m+[m
+[32m+[m[32m# Start the continuous monitor in the background[m
+[32m+[m[32mmonitor-start:[m
+[32m+[m	[32m@echo "Prompting for sudo password to read GPU stats via powermetrics..."[m
+[32m+[m	[32m@sudo -v[m
+[32m+[m	[32m@echo "Starting continuous monitor..."[m
+[32m+[m	[32m@nohup ./continuous_monitor.sh > /dev/null 2>&1 &[m
+[32m+[m
+[32m+[m[32m# Stop the continuous monitor[m
+[32m+[m[32mmonitor-stop:[m
+[32m+[m	[32m@if [ -f /tmp/ollama_monitor.pid ]; then \[m
+[32m+[m		[32mecho "Stopping continuous monitor (PID $$(cat /tmp/ollama_monitor.pid))..."; \[m
+[32m+[m		[32mkill -TERM $$(cat /tmp/ollama_monitor.pid) || true; \[m
+[32m+[m		[32mrm -f /tmp/ollama_monitor.pid; \[m
+[32m+[m	[32melse \[m
+[32m+[m		[32mecho "Continuous monitor is not running or PID file is missing."; \[m
+[32m+[m	[32mfi[m
+[32m+[m
+[32m+[m[32mclean:[m
+[32m+[m	[32m@echo "Cleaning up benchmark data..."[m
+[32m+[m	[32m@rm -rf benchmark_data/[m
