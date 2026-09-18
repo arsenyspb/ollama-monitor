@@ -1,0 +1,12 @@
+{
+  "tasks": [
+    {
+      "status": "in_progress",
+      "content": "Generate wiki for ollama-monitor"
+    },
+    {
+      "content": "Create and verify PR",
+      "status": "pending"
+    }
+  ]
+}
