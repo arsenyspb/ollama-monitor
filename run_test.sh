@@ -15,7 +15,7 @@ XTERM_PID=$!
 sleep 10
 
 # Take a screenshot
-scrot /tmp/dashboard.png
+import -window root /tmp/dashboard.png
 
 # Kill processes
 kill $XTERM_PID
