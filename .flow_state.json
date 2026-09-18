@@ -5,8 +5,8 @@
       "status": "completed"
     },
     {
-      "status": "in_progress",
-      "content": "Commit and open PR"
+      "content": "Commit and open PR",
+      "status": "completed"
     }
   ]
 }
