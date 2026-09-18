@@ -5,16 +5,16 @@
       "status": "completed"
     },
     {
-      "status": "completed",
-      "content": "Change red box width to 100%"
+      "content": "Change red box width to 100%",
+      "status": "completed"
     },
     {
-      "status": "in_progress",
-      "content": "Verify with inspect_ui"
+      "content": "Verify with inspect_ui",
+      "status": "completed"
     },
     {
-      "status": "pending",
-      "content": "Create PR"
+      "content": "Create PR",
+      "status": "in_progress"
     }
   ]
 }
