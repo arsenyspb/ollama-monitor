@@ -3,7 +3,6 @@
 # Start the continuous monitor in the background
 monitor-start:
 	@echo "Prompting for sudo password to read GPU stats via powermetrics..."
-	@sudo -v
 	@echo "Starting continuous monitor..."
 	@nohup ./src/continuous_monitor.sh > /dev/null 2>&1 &
 
