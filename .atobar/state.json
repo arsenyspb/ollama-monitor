@@ -1,8 +1,8 @@
 {
   "tasks": [
     {
-      "status": "completed",
-      "content": "Check Makefile for make dashboard command"
+      "content": "Check Makefile for make dashboard command",
+      "status": "completed"
     },
     {
       "status": "completed",
@@ -13,8 +13,8 @@
       "content": "Use inspect_ui to verify the TUI dashboard"
     },
     {
-      "status": "in_progress",
-      "content": "Create PR with verification results"
+      "content": "Create PR with verification results",
+      "status": "completed"
     }
   ]
 }
