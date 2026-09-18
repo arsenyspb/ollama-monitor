@@ -8,11 +8,11 @@ export DISPLAY=:99
 sleep 1
 
 # Run xterm with make dashboard
-xterm -e "make dashboard" &
+xterm -geometry 120x40 -e "make dashboard" &
 XTERM_PID=$!
 
 # Give it some time to start and render
-sleep 5
+sleep 10
 
 # Take a screenshot
 scrot /tmp/dashboard.png

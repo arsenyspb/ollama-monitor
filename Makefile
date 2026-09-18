@@ -71,9 +71,9 @@ tps-proxy-stop:
 
 dashboard: monitor-start tps-proxy-start
 	@echo "Ensuring plotext is installed..."
-	@python3 -c "import plotext" || pip3 install --break-system-packages plotext==5.2.8
+	@python3 -c "import sys; sys.path.append('/home/ubuntu/.local/lib/python3.12/site-packages'); import plotext" || /usr/bin/python3 -m pip install --break-system-packages plotext==5.2.8
 	@echo "Starting TUI dashboard..."
-	@python3 ./src/monitor_tui.py
+	@PYTHONPATH="/home/ubuntu/.local/lib/python3.12/site-packages:$$PYTHONPATH" python3 ./src/monitor_tui.py
 
 clean:
 	@echo "Cleaning up benchmark data..."
