@@ -1,6 +1,23 @@
-.PHONY: monitor-start monitor-stop tps-proxy-start tps-proxy-stop dashboard clean
+# Agents: see AGENTS.md section 4. Targets marked HUMAN-ONLY need sudo or change
+# system services and must not be run by AI agents. Safe targets: setup, test.
+#
+# HUMAN-ONLY: monitor-start, monitor-stop, tps-proxy-start, tps-proxy-stop, dashboard
 
-# Start the continuous monitor in the background
+.PHONY: setup test monitor-start monitor-stop tps-proxy-start tps-proxy-stop dashboard clean
+
+PY ?= .venv/bin/python
+
+# Create the development environment (safe for agents)
+setup:
+	@python3 -m venv .venv
+	@.venv/bin/pip install -r requirements-dev.txt
+
+# Run the test suite (safe for agents)
+test:
+	@test -x $(PY) || { echo "Run 'make setup' first."; exit 1; }
+	@$(PY) -m pytest tests/
+
+# Start the continuous monitor in the background (HUMAN-ONLY)
 monitor-start:
 	@echo "Prompting for sudo password to read GPU stats via powermetrics..."
 	@sudo -v
