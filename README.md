@@ -14,10 +14,11 @@ This repository provides tools to track hardware usage (CPU, GPU, RAM) and token
 
 ### Interactive Dashboard
 
-To view a real-time TUI (Text User Interface) plotting the continuous metrics in your terminal (requires the continuous monitor to be running):
+To view a real-time TUI (Text User Interface) plotting the continuous metrics in your terminal:
 ```shell
 make dashboard
 ```
+*Note: `make dashboard` starts the continuous monitor and the TPS proxy itself, so it prompts for `sudo` and reconfigures Ollama. See [Usage](#usage).*
 
 ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
@@ -89,6 +90,16 @@ The script generates the following files in the specified `OUTPUT_DIR`:
 -   **Summary CSV** (`benchmark_summary.csv`): A log file that appends a summary of each benchmark run, including performance and configuration details.
 
 
-## AI Co-Development Guidelines
-This project supports AI-assisted development. Please refer to [AI.md](AI.md) for guidelines on how AI agents should interact with this repository (Issue-driven development, PR workflows, and CI/CD).
+## Contributing
+
+Requirements: Python 3.10+. The shell scripts require macOS (`powermetrics`, `pmset`).
+
+```shell
+make setup   # create .venv and install development dependencies
+make test    # run the test suite
+```
+
+Work is tracked through GitHub issues and pull requests. Pull requests are required for changes to `main`, and CI must pass.
+
+AI coding agents (Claude, Gemini, Codex, Devin, and others) should read [AGENTS.md](AGENTS.md) before making changes. `CLAUDE.md` and `GEMINI.md` point to the same file.
 

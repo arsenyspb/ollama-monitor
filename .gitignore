@@ -1,2 +1,8 @@
 # Ignore benchmark output files
 benchmark_data/
+
+# Python and tooling
+__pycache__/
+.venv/
+.pytest_cache/
+.DS_Store

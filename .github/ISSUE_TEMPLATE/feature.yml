@@ -1,0 +1,41 @@
+name: Feature or improvement
+description: Propose a feature or improvement with an ordered, testable checklist
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What outcome do we want, and for whom?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable behavior that proves the work is done.
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Ordered steps. Tests come first. Tick items in the PR that delivers them.
+      value: |
+        - [ ] Write failing test(s) for the behavior
+        - [ ] Implement
+        - [ ] `make test` passes
+        - [ ] Update docs if behavior changed
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Decisions and rejected alternatives
+      description: Why this approach? What did you consider and reject? Required so the next agent or human keeps the context.
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of scope

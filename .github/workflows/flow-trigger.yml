@@ -6,7 +6,8 @@ on:
 
 jobs:
   forward:
-    if: startsWith(github.event.label.name, 'flow:')
+    # Only the repository owner may start the harness. The labeler is github.event.sender.
+    if: startsWith(github.event.label.name, 'flow:') && github.event.sender.login == github.repository_owner
     runs-on: ubuntu-latest
     steps:
       - name: Forward to central orchestrator

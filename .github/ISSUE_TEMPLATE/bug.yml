@@ -1,0 +1,39 @@
+name: Bug report
+description: Report incorrect behavior with reproduction steps
+labels: ["bug"]
+body:
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: Include exact error text and the command that produced it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: The smallest steps or test that fails. A failing test is ideal.
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      value: |
+        - [ ] Write a failing regression test
+        - [ ] Fix
+        - [ ] `make test` passes
+    validations:
+      required: true
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Decisions and rejected alternatives
+      description: Root cause hypothesis and fixes you considered.
