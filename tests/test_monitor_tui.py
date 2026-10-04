@@ -56,3 +56,64 @@ def test_read_data_empty_or_missing_file():
         assert model_meta == "None"
     finally:
         monitor_tui.CSV_FILE = original_csv_file
+
+def test_read_data_empty_or_non_numeric_tps():
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_csv:
+        temp_csv.write("Timestamp,CPU_Usage_%,GPU_Load_%,RAM_Used_GB,Eval_TPS,Model_Name,Model_Metadata\n")
+        temp_csv.write("12:00:00,10.5,20.0,4.5,25.4,llama3,8B|Q4|4.7GB\n")
+        temp_csv.write("12:00:01,15.2,30.0,5.1,,llama3,8B|Q4|4.7GB\n")  # Empty TPS
+        temp_csv.write("12:00:02,12.0,25.0,4.8,N/A,llama3,8B|Q4|4.7GB\n")  # Non-numeric TPS
+        temp_csv.write("12:00:03,11.0,21.0,4.6,20.0,llama3,8B|Q4|4.7GB\n")
+        temp_csv_path = temp_csv.name
+
+    original_csv_file = monitor_tui.CSV_FILE
+    monitor_tui.CSV_FILE = temp_csv_path
+
+    try:
+        times, cpu, gpu, ram, tps, model_name, model_meta = monitor_tui.read_data()
+        # Ensure all series have the exact same length (no desync)
+        assert len(times) == len(cpu) == len(gpu) == len(ram) == len(tps) == 2
+        assert times == ["12:00:00", "12:00:03"]
+        assert tps == [25.4, 20.0]
+    finally:
+        monitor_tui.CSV_FILE = original_csv_file
+        os.remove(temp_csv_path)
+
+def test_read_data_more_than_60_rows():
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_csv:
+        temp_csv.write("Timestamp,CPU_Usage_%,GPU_Load_%,RAM_Used_GB,Eval_TPS,Model_Name,Model_Metadata\n")
+        for i in range(100):
+            temp_csv.write(f"12:{i//60:02d}:{i%60:02d},10.0,20.0,4.0,15.0,llama3,8B\n")
+        temp_csv_path = temp_csv.name
+
+    original_csv_file = monitor_tui.CSV_FILE
+    monitor_tui.CSV_FILE = temp_csv_path
+
+    try:
+        times, cpu, gpu, ram, tps, model_name, model_meta = monitor_tui.read_data()
+        assert len(times) == 60
+        assert times[0] == "12:00:40"
+        assert times[-1] == "12:01:39"
+        assert len(cpu) == len(gpu) == len(ram) == len(tps) == 60
+    finally:
+        monitor_tui.CSV_FILE = original_csv_file
+        os.remove(temp_csv_path)
+
+def test_read_data_none_model_row():
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_csv:
+        temp_csv.write("Timestamp,CPU_Usage_%,GPU_Load_%,RAM_Used_GB,Eval_TPS,Model_Name,Model_Metadata\n")
+        temp_csv.write("12:00:00,10.0,20.0,4.0,15.0,None,None\n")
+        temp_csv_path = temp_csv.name
+
+    original_csv_file = monitor_tui.CSV_FILE
+    monitor_tui.CSV_FILE = temp_csv_path
+
+    try:
+        times, cpu, gpu, ram, tps, model_name, model_meta = monitor_tui.read_data()
+        assert len(times) == 1
+        assert model_name == "None"
+        assert model_meta == "None"
+    finally:
+        monitor_tui.CSV_FILE = original_csv_file
+        os.remove(temp_csv_path)
+

@@ -2,6 +2,7 @@
 import time
 import os
 import sys
+from collections import deque
 
 try:
     import plotext as plt
@@ -9,7 +10,8 @@ except ImportError:
     print("plotext is not installed. Run: pip install plotext")
     sys.exit(1)
 
-CSV_FILE = "benchmark_data/continuous_monitor.csv"
+PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+CSV_FILE = os.environ.get("MONITOR_CSV_FILE", os.path.join(PROJECT_ROOT, "benchmark_data", "continuous_monitor.csv"))
 MAX_POINTS = 60 # Show last 60 seconds of data
 
 def read_data():
@@ -18,12 +20,12 @@ def read_data():
     
     try:
         with open(CSV_FILE, 'r') as f:
-            lines = f.readlines()[1:] # Skip header
+            header = f.readline()
+            if not header:
+                return [], [], [], [], [], "None", "None"
+            lines = list(deque(f, maxlen=MAX_POINTS))
     except Exception:
         return [], [], [], [], [], "None", "None"
-
-    # Get last MAX_POINTS lines
-    lines = lines[-MAX_POINTS:]
     
     times = []
     cpu = []
@@ -38,13 +40,18 @@ def read_data():
         if len(parts) >= 5:
             t, c, g, r, p = parts[:5]
             try:
-                times.append(t)
-                cpu.append(float(c))
-                gpu.append(float(g))
-                ram.append(float(r))
-                tps.append(float(p))
+                c_val = float(c)
+                g_val = float(g)
+                r_val = float(r)
+                p_val = float(p)
             except ValueError:
                 continue
+
+            times.append(t)
+            cpu.append(c_val)
+            gpu.append(g_val)
+            ram.append(r_val)
+            tps.append(p_val)
             
             if len(parts) >= 7:
                 last_model_name = parts[5]

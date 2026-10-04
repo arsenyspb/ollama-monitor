@@ -7,6 +7,11 @@
 
 PY ?= .venv/bin/python
 
+USER_ID ?= $(shell id -u 2>/dev/null || echo 0)
+RUNTIME_DIR ?= /tmp/ollama-monitor-$(USER_ID)
+MONITOR_PID_FILE ?= $(RUNTIME_DIR)/ollama_monitor.pid
+PROXY_PID_FILE ?= $(RUNTIME_DIR)/ollama_proxy.pid
+
 # Create the development environment (safe for agents)
 setup:
 	@python3 -m venv .venv
@@ -19,6 +24,11 @@ test:
 
 # Start the continuous monitor in the background (HUMAN-ONLY)
 monitor-start:
+	@mkdir -p $(RUNTIME_DIR) && chmod 700 $(RUNTIME_DIR) 2>/dev/null || true
+	@if [ -f $(MONITOR_PID_FILE) ] && kill -0 $$(cat $(MONITOR_PID_FILE)) 2>/dev/null; then \
+		echo "Continuous monitor is already running (PID $$(cat $(MONITOR_PID_FILE)))."; \
+		exit 1; \
+	fi
 	@echo "Prompting for sudo password to read GPU stats via powermetrics..."
 	@sudo -v
 	@echo "Starting continuous monitor..."
@@ -26,16 +36,25 @@ monitor-start:
 
 # Stop the continuous monitor
 monitor-stop:
-	@if [ -f /tmp/ollama_monitor.pid ]; then \
-		echo "Stopping continuous monitor (PID $$(cat /tmp/ollama_monitor.pid))..."; \
-		kill -TERM $$(cat /tmp/ollama_monitor.pid) || true; \
-		rm -f /tmp/ollama_monitor.pid; \
+	@PID=""; \
+	if [ -f $(MONITOR_PID_FILE) ]; then PID=$$(cat $(MONITOR_PID_FILE)); \
+	elif [ -f /tmp/ollama_monitor.pid ]; then PID=$$(cat /tmp/ollama_monitor.pid); fi; \
+	if [ -n "$$PID" ] && kill -0 "$$PID" 2>/dev/null; then \
+		echo "Stopping continuous monitor (PID $$PID)..."; \
+		kill -TERM "$$PID" || true; \
+		rm -f $(MONITOR_PID_FILE) /tmp/ollama_monitor.pid; \
 	else \
 		echo "Continuous monitor is not running or PID file is missing."; \
+		rm -f $(MONITOR_PID_FILE) /tmp/ollama_monitor.pid; \
 	fi
 
 # Start the Ollama TPS proxy
 tps-proxy-start:
+	@mkdir -p $(RUNTIME_DIR) && chmod 700 $(RUNTIME_DIR) 2>/dev/null || true
+	@if [ -f $(PROXY_PID_FILE) ] && kill -0 $$(cat $(PROXY_PID_FILE)) 2>/dev/null; then \
+		echo "Ollama proxy is already running (PID $$(cat $(PROXY_PID_FILE)))."; \
+		exit 1; \
+	fi
 	@echo "Configuring Ollama to run on 11435 and starting proxy on 11434..."
 	@OS=$$(uname -s); \
 	if [ "$$OS" = "Linux" ]; then \
@@ -59,18 +78,28 @@ tps-proxy-start:
 		echo "Unsupported OS: $$OS"; exit 1; \
 	fi
 	@echo "Starting Ollama proxy..."
-	@nohup ./src/ollama_proxy.py --listen 11434 --forward 11435 > /dev/null 2>&1 &
-	@echo $$! > /tmp/ollama_proxy.pid
-	@echo "Proxy started. Clients can use default port 11434 with zero configuration."
+	@rm -f $(PROXY_PID_FILE) /tmp/ollama_proxy.pid
+	@nohup ./src/ollama_proxy.py --listen 11434 --forward 11435 --pid-file $(PROXY_PID_FILE) > /dev/null 2>&1 &
+	@sleep 1
+	@if [ -f $(PROXY_PID_FILE) ] && kill -0 $$(cat $(PROXY_PID_FILE)) 2>/dev/null; then \
+		echo "Proxy started (PID $$(cat $(PROXY_PID_FILE))). Clients can use default port 11434 with zero configuration."; \
+	else \
+		echo "Failed to start proxy. Check if port 11434 is already in use."; \
+		exit 1; \
+	fi
 
 # Stop the Ollama TPS proxy
 tps-proxy-stop:
-	@if [ -f /tmp/ollama_proxy.pid ]; then \
-		echo "Stopping Ollama proxy (PID $$(cat /tmp/ollama_proxy.pid))..."; \
-		kill -TERM $$(cat /tmp/ollama_proxy.pid) || true; \
-		rm -f /tmp/ollama_proxy.pid; \
+	@PID=""; \
+	if [ -f $(PROXY_PID_FILE) ]; then PID=$$(cat $(PROXY_PID_FILE)); \
+	elif [ -f /tmp/ollama_proxy.pid ]; then PID=$$(cat /tmp/ollama_proxy.pid); fi; \
+	if [ -n "$$PID" ] && kill -0 "$$PID" 2>/dev/null; then \
+		echo "Stopping Ollama proxy (PID $$PID)..."; \
+		kill -TERM "$$PID" || true; \
+		rm -f $(PROXY_PID_FILE) /tmp/ollama_proxy.pid; \
 	else \
 		echo "Ollama proxy is not running or PID file is missing."; \
+		rm -f $(PROXY_PID_FILE) /tmp/ollama_proxy.pid; \
 	fi
 	@echo "Restoring Ollama default configuration..."
 	@OS=$$(uname -s); \
