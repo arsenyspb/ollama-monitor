@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Operational brief for AI coding agents. Tool-neutral: `CLAUDE.md` and `GEMINI.md` point here.
+Operational brief for AI coding agents. Tool-neutral: `CLAUDE.md`, `GEMINI.md`, and `PI.md` point here.
 
 ## 1. Project
 
