@@ -25,7 +25,7 @@ If `make test` fails on a clean checkout, fix the setup and report it before cha
 | `src/bench_monitor.sh` | One-shot benchmark run (macOS); config variables at the top of the file |
 | `tests/` | pytest suites for the TUI and proxy |
 | `Makefile` | Entry points; see section 4 |
-| `.github/workflows/` | `test.yml` (CI), `pr-checks.yml` (AI attribution), `flow-trigger.yml` (see section 7) |
+| `.github/workflows/` | `test.yml` (CI), `flow-trigger.yml` (see section 7) |
 | `benchmark_data/` | Generated output. Gitignored. Never commit it. |
 
 ## 4. Commands: safe vs. human-only
@@ -54,7 +54,7 @@ If `make test` fails on a clean checkout, fix the setup and report it before cha
 - **AI-assisted work must be attributed.** Each commit an agent authored ends with a trailer:
   `Co-Authored-By: <agent name and model> <noreply@vendor-domain>`
   Example: `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`
-- **PRs:** the PR template has an `AI-assisted` field. Set it to `yes` or `no`. When `yes`, `pr-checks.yml` requires at least one commit in the PR to carry a `Co-Authored-By:` trailer. The PR body must end with the generator footer the agent's tool specifies.
+- **PRs:** the PR body must end with the generator footer the agent's tool specifies.
 - **Identity:** do not change git identity. Use the configured one.
 
 ## 7. Untrusted input and the `flow:` pipeline
