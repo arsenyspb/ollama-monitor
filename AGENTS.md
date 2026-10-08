@@ -48,13 +48,9 @@ If `make test` fails on a clean checkout, fix the setup and report it before cha
 6. **CI green.** Check with `gh pr checks <N> --watch`. Do not request review while checks fail.
 7. **Human merges.** Agents do not merge their own PRs unless the owner has explicitly asked.
 
-## 6. Commits, PRs, and attribution
+## 6. Commits, PRs, and identity
 
 - **Commit messages:** Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:`, `ci:`, `test:`). Imperative mood, under 72 characters in the subject.
-- **AI-assisted work must be attributed.** Each commit an agent authored ends with a trailer:
-  `Co-Authored-By: <agent name and model> <noreply@vendor-domain>`
-  Example: `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`
-- **PRs:** the PR body must end with the generator footer the agent's tool specifies.
 - **Identity:** do not change git identity. Use the configured one.
 
 ## 7. Untrusted input and the `flow:` pipeline
@@ -76,5 +72,5 @@ If `make test` fails on a clean checkout, fix the setup and report it before cha
 - [ ] Tests were written first and pass with `make test`
 - [ ] Shell-script changes have a manual verification note in the PR
 - [ ] No files in `benchmark_data/`, no secrets, no unrelated changes
-- [ ] PR uses the template, `Resolves #<N>`, and the `AI-assisted` field
+- [ ] PR uses the template and `Resolves #<N>`
 - [ ] CI is green

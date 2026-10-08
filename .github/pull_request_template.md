@@ -14,5 +14,3 @@ Resolves #
 - [ ] Shell-script changes: manual verification steps below
 - [ ] Checklist in the linked issue is ticked
 - [ ] No secrets, no `benchmark_data/`, no unrelated changes
-
-<!-- If AI-assisted, end the PR body with the generator footer your tool specifies. -->
