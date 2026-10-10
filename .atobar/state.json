@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "content": "The `--version` flag is not implemented in `src/ollama_proxy.py` or `src/monitor_tui.py`.",
+      "status": "completed"
+    },
+    {
+      "content": "There are no tests for the `--version` flag in `tests/test_ollama_proxy.py`.",
+      "status": "completed"
+    },
+    {
+      "content": "The acceptance criteria for this pull request are \"Implemented CLI argument, and full test coverage for future releases.\" Neither of these criteria has been met.",
+      "status": "completed"
+    }
+  ]
+}
