@@ -56,3 +56,26 @@ def test_read_data_empty_or_missing_file():
         assert model_meta == "None"
     finally:
         monitor_tui.CSV_FILE = original_csv_file
+
+
+def test_monitor_tui_version_attribute():
+    assert hasattr(monitor_tui, "__version__")
+    assert isinstance(monitor_tui.__version__, str)
+    assert len(monitor_tui.__version__.split(".")) >= 3
+
+
+def test_monitor_tui_cli_version_flag():
+    import subprocess
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/monitor_tui.py'))
+    result = subprocess.run([sys.executable, script_path, "--version"], capture_output=True, text=True, timeout=5)
+    assert result.returncode == 0
+    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+
+
+def test_monitor_tui_cli_short_version_flag():
+    import subprocess
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/monitor_tui.py'))
+    result = subprocess.run([sys.executable, script_path, "-v"], capture_output=True, text=True, timeout=5)
+    assert result.returncode == 0
+    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+

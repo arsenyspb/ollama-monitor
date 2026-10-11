@@ -76,3 +76,27 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
     assert temp_tps.exists()
     content = temp_tps.read_text().strip()
     assert content == "7.50"
+
+
+def test_ollama_proxy_version_attribute():
+    import ollama_proxy
+    assert hasattr(ollama_proxy, "__version__")
+    assert isinstance(ollama_proxy.__version__, str)
+    assert len(ollama_proxy.__version__.split(".")) >= 3
+
+
+def test_ollama_proxy_cli_version_flag():
+    import subprocess
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/ollama_proxy.py'))
+    result = subprocess.run([sys.executable, script_path, "--version"], capture_output=True, text=True, timeout=5)
+    assert result.returncode == 0
+    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+
+
+def test_ollama_proxy_cli_short_version_flag():
+    import subprocess
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/ollama_proxy.py'))
+    result = subprocess.run([sys.executable, script_path, "-v"], capture_output=True, text=True, timeout=5)
+    assert result.returncode == 0
+    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+
