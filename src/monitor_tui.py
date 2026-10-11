@@ -2,12 +2,21 @@
 import time
 import os
 import sys
+import argparse
+
+try:
+    from version import __version__
+except ImportError:
+    try:
+        from src.version import __version__
+    except ImportError:
+        __version__ = "0.1.0"
 
 try:
     import plotext as plt
 except ImportError:
-    print("plotext is not installed. Run: pip install plotext")
-    sys.exit(1)
+    plt = None
+
 
 CSV_FILE = "benchmark_data/continuous_monitor.csv"
 MAX_POINTS = 60 # Show last 60 seconds of data
@@ -53,8 +62,12 @@ def read_data():
     return times, cpu, gpu, ram, tps, last_model_name, last_model_meta
 
 def draw_dashboard():
+    if plt is None:
+        print("plotext is not installed. Run: pip install plotext")
+        sys.exit(1)
     plt.clear_terminal()
     plt.theme("clear")
+
     
     times, cpu, gpu, ram, tps, model_name, model_meta = read_data()
     
@@ -108,8 +121,13 @@ def draw_dashboard():
     
     plt.show()
 
-def main():
+def main(argv=None):
+    parser = argparse.ArgumentParser(description='Ollama Monitor TUI Dashboard')
+    parser.add_argument('--version', '-V', action='version', version=f'%(prog)s {__version__}')
+    parser.parse_args(argv)
+
     print("Starting dashboard... Press Ctrl+C to stop.")
+
     try:
         while True:
             draw_dashboard()

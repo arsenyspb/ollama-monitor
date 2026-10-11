@@ -8,7 +8,16 @@ import sys
 import argparse
 import time
 
+try:
+    from version import __version__
+except ImportError:
+    try:
+        from src.version import __version__
+    except ImportError:
+        __version__ = "0.1.0"
+
 FORWARD_HOST = '127.0.0.1'
+
 TPS_FILE = '/tmp/ollama_current_tps'
 
 def extract_tps_from_line(line):
@@ -142,11 +151,13 @@ def handle_client(client_socket, forward_port):
     client_to_server.start()
     server_to_client.start()
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description='Ollama TPS Proxy')
+    parser.add_argument('--version', '-V', action='version', version=f'%(prog)s {__version__}')
     parser.add_argument('--listen', type=int, default=11434, help='Port to listen on (default: 11434)')
     parser.add_argument('--forward', type=int, default=11435, help='Port to forward to (default: 11435)')
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+
 
     listen_port = args.listen
     forward_port = args.forward
