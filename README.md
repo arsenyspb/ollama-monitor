@@ -23,6 +23,35 @@ make dashboard
 ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
+#### High-Density Charting & Configuration (SOTA 2026)
+
+The TUI uses high-density Unicode Braille patterns by default, doubling the vertical and subpixel resolution (8 subpixels per character cell vs 4 in legacy half-block mode) in the exact same terminal dimensions.
+
+For architectural decisions and shell compatibility research, see [docs/research_tui_density.md](docs/research_tui_density.md).
+
+You can also run the TUI standalone with custom options:
+```shell
+# Run with custom density, timeline points, and refresh rate
+python3 ./src/monitor_tui.py --density braille --timeline 60 --refresh 1.0
+
+# Configure individual charts independently
+python3 ./src/monitor_tui.py \
+  --cpu-timeline 60 --cpu-refresh 1.0 --cpu-density braille \
+  --ram-timeline 120 --ram-refresh 5.0 --ram-density hd \
+  --tps-timeline 30 --tps-refresh 0.5 --tps-density braille
+```
+
+Available CLI flags:
+- `--density`, `-d`: Default marker resolution (`braille` [default, 8 subpixels], `fhd` [6 subpixels], `hd` [4 subpixels], `sd` [1 subpixel]).
+- `--timeline`, `-t`: Default number of historical data points (default: 60).
+- `--refresh`, `-r`: Global refresh loop interval in seconds (default: 1.0).
+- `--<chart>-density`: Per-chart density override (`--cpu-density`, `--gpu-density`, `--ram-density`, `--tps-density`).
+- `--<chart>-timeline`: Per-chart timeline points (`--cpu-timeline`, `--gpu-timeline`, `--ram-timeline`, `--tps-timeline`).
+- `--<chart>-refresh`: Per-chart refresh interval in seconds (`--cpu-refresh`, `--gpu-refresh`, `--ram-refresh`, `--tps-refresh`).
+- `--once`: Render a single snapshot and exit (useful for testing and scripting).
+- `--csv`: Path to custom continuous monitor CSV.
+
+
 
 ## Usage
 

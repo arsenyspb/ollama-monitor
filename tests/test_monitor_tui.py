@@ -164,3 +164,62 @@ def test_draw_dashboard_once_runs_without_error():
         monitor_tui.CSV_FILE = original_csv
         os.remove(temp_csv_path)
 
+def test_draw_dashboard_waiting_when_empty(capsys):
+    with tempfile.NamedTemporaryFile(mode='w', delete=False) as temp_csv:
+        temp_csv_path = temp_csv.name
+
+    original_csv = monitor_tui.CSV_FILE
+    monitor_tui.CSV_FILE = temp_csv_path
+    try:
+        config = monitor_tui.DashboardConfig(default_density="braille")
+        monitor_tui.draw_dashboard(config=config)
+        captured = capsys.readouterr()
+        assert "Waiting for data" in captured.out
+    finally:
+        monitor_tui.CSV_FILE = original_csv
+        os.remove(temp_csv_path)
+
+def test_build_config_from_args_overrides():
+    args = monitor_tui.parse_args([
+        "--density", "hd",
+        "--timeline", "50",
+        "--refresh", "3.0",
+        "--cpu-density", "braille",
+        "--cpu-timeline", "100",
+        "--cpu-refresh", "0.5",
+        "--gpu-density", "fhd",
+        "--ram-timeline", "200",
+        "--tps-refresh", "2.0",
+    ])
+    cfg = monitor_tui.build_config_from_args(args)
+    assert cfg.default_density == "hd"
+    assert cfg.default_timeline == 50
+    assert cfg.default_refresh == 3.0
+    
+    # CPU has full overrides
+    assert cfg.charts["cpu"].density == "braille"
+    assert cfg.charts["cpu"].timeline == 100
+    assert cfg.charts["cpu"].refresh_interval == 0.5
+    
+    # GPU has density override only, inherits default timeline & refresh
+    assert cfg.charts["gpu"].density == "fhd"
+    assert cfg.charts["gpu"].timeline == 50
+    assert cfg.charts["gpu"].refresh_interval == 3.0
+    
+    # RAM has timeline override
+    assert cfg.charts["ram"].density == "hd"
+    assert cfg.charts["ram"].timeline == 200
+    assert cfg.charts["ram"].refresh_interval == 3.0
+    
+    # TPS has refresh override
+    assert cfg.charts["tps"].density == "hd"
+    assert cfg.charts["tps"].timeline == 50
+    assert cfg.charts["tps"].refresh_interval == 2.0
+
+def test_custom_marker_resolution():
+    res = monitor_tui.get_marker_resolution("custom_dot")
+    assert res["subpixels"] == 1
+    assert res["horizontal_factor"] == 1
+    assert res["vertical_factor"] == 1
+
+
