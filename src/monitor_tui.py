@@ -120,3 +120,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+import sys
+
+__version__ = "0.1.0"
