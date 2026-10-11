@@ -1,5 +1,6 @@
 import sys
 import os
+import subprocess
 import pytest
 from unittest.mock import Mock, patch
 
@@ -76,3 +77,43 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
     assert temp_tps.exists()
     content = temp_tps.read_text().strip()
     assert content == "7.50"
+
+
+def test_version_flag():
+    result = subprocess.run(
+        [sys.executable, "src/ollama_proxy.py", "--version"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert "ollama-monitor version 0.1.0" in result.stdout.lower()
+
+
+def test_version_flag_short():
+    result = subprocess.run(
+        [sys.executable, "src/ollama_proxy.py", "-v"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert "ollama-monitor version 0.1.0" in result.stdout.lower()
+
+
+def test_version_flag_python3():
+    result = subprocess.run(
+        ["python3", "src/ollama_proxy.py", "--version"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert "ollama-monitor version" in result.stdout.lower()
+
+
+def test_module_version():
+    import ollama_proxy
+    assert hasattr(ollama_proxy, "__version__")
+    assert ollama_proxy.__version__ == "0.1.0"
+
