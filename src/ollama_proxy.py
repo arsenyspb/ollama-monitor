@@ -8,6 +8,8 @@ import sys
 import argparse
 import time
 
+__version__ = "0.1.0"
+
 FORWARD_HOST = '127.0.0.1'
 TPS_FILE = '/tmp/ollama_current_tps'
 
@@ -144,6 +146,12 @@ def handle_client(client_socket, forward_port):
 
 def main():
     parser = argparse.ArgumentParser(description='Ollama TPS Proxy')
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f'ollama-monitor version {__version__}',
+        help='Show version and exit',
+    )
     parser.add_argument('--listen', type=int, default=11434, help='Port to listen on (default: 11434)')
     parser.add_argument('--forward', type=int, default=11435, help='Port to forward to (default: 11435)')
     args = parser.parse_args()

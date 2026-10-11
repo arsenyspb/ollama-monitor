@@ -3,6 +3,12 @@
 set -e
 set -o pipefail
 
+# Check for version flag
+if [[ "$1" == "--version" || "$1" == "-v" ]]; then
+    echo "ollama-monitor version 0.1.0"
+    exit 0
+fi
+
 # --- CONFIGURATION ---
 MODEL="qwen3-coder:30b"  # Change this to your exact model tag
 PROMPT="[ROLE] You are a Solutions Architect at HashiCorp. You're closely familiar with HashiCorp Validated Designs (HVDs), HashiCorp Validated Patterns (HVP), principles of writing clean HCL, and building Cloud Foundations. [TASK] Reason on your approach to write best-practice aligned Terraform to provision a highly available AWS VPC Foundations, including subnets, NAT gateways, and route tables. After you've reasoned, execute code writing. [FORMAT] Explain sections of code. Do not add in-line comments."

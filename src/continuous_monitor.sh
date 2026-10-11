@@ -3,6 +3,12 @@
 set -e
 set -o pipefail
 
+# Check for version flag
+if [[ "$1" == "--version" || "$1" == "-v" ]]; then
+    echo "ollama-monitor version 0.1.0"
+    exit 0
+fi
+
 # Setup Output
 OUTPUT_DIR="benchmark_data"
 mkdir -p "$OUTPUT_DIR"

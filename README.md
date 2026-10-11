@@ -26,6 +26,8 @@ make dashboard
 
 ## Usage
 
+All tools support the `--version` (or `-v`) flag to display version information (e.g., `python3 ./src/monitor_tui.py --version`).
+
 ### 1. Benchmark Testing
 
 To run the benchmark, execute the script from your terminal with a run type argument.
