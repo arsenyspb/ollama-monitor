@@ -1,0 +1,32 @@
+{
+  "tasks": [
+    {
+      "content": "Write failing tests for --version flag in tests/test_ollama_proxy.py and tests/test_monitor_tui.py",
+      "status": "completed"
+    },
+    {
+      "content": "Commit failing tests with test(...) message prefix",
+      "status": "completed"
+    },
+    {
+      "content": "Implement --version flag in src/version.py, src/ollama_proxy.py, src/monitor_tui.py and shell scripts",
+      "status": "completed"
+    },
+    {
+      "content": "Verify all tests pass with make test",
+      "status": "completed"
+    },
+    {
+      "content": "Update documentation in README.md",
+      "status": "completed"
+    },
+    {
+      "content": "Commit implementation and docs with feat(...) prefix",
+      "status": "completed"
+    },
+    {
+      "content": "Open PR with create_and_verify_pr and emit flow-ack envelope",
+      "status": "completed"
+    }
+  ]
+}
