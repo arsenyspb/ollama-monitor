@@ -109,6 +109,9 @@ def draw_dashboard():
     plt.show()
 
 def main():
+    parser = argparse.ArgumentParser(description="Ollama Monitor TUI")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    args = parser.parse_args()
     print("Starting dashboard... Press Ctrl+C to stop.")
     try:
         while True:
@@ -123,3 +126,7 @@ if __name__ == "__main__":
 import sys
 
 __version__ = "0.1.0"
+import sys
+import argparse
+__version__ = "0.1.0"
+

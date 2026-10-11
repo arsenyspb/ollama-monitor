@@ -56,3 +56,19 @@ def test_read_data_empty_or_missing_file():
         assert model_meta == "None"
     finally:
         monitor_tui.CSV_FILE = original_csv_file
+
+def test_version_flag(capsys):
+    # Temporarily modify sys.argv to include the --version flag
+    original_argv = sys.argv
+    sys.argv = ["monitor_tui.py", "--version"]
+    
+    try:
+        with pytest.raises(SystemExit) as e:
+            monitor_tui.main()
+        assert e.type == SystemExit
+        assert e.value.code == 0
+        
+        captured = capsys.readouterr()
+        assert f"monitor_tui.py {monitor_tui.__version__}" in captured.out
+    finally:
+        sys.argv = original_argv
