@@ -56,3 +56,30 @@ def test_read_data_empty_or_missing_file():
         assert model_meta == "None"
     finally:
         monitor_tui.CSV_FILE = original_csv_file
+
+def test_monitor_tui_version():
+    assert hasattr(monitor_tui, '__version__')
+    assert monitor_tui.__version__ == "0.1.0"
+
+def test_monitor_tui_version_cli(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        monitor_tui.main(['--version'])
+    assert excinfo.value.code == 0
+    captured = capsys.readouterr()
+    assert "0.1.0" in (captured.out + captured.err)
+
+def test_monitor_tui_version_short_cli(capsys):
+    with pytest.raises(SystemExit) as excinfo:
+        monitor_tui.main(['-V'])
+    assert excinfo.value.code == 0
+    captured = capsys.readouterr()
+    assert "0.1.0" in (captured.out + captured.err)
+
+def test_monitor_tui_subprocess_version():
+    import subprocess
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/monitor_tui.py'))
+    res = subprocess.run([sys.executable, script_path, '--version'], capture_output=True, text=True, timeout=5)
+    assert res.returncode == 0
+    assert "0.1.0" in (res.stdout + res.stderr)
+
+
