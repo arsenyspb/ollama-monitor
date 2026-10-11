@@ -59,9 +59,22 @@ def test_read_data_empty_or_missing_file():
 
 
 def test_monitor_tui_version_attribute():
+    import version
+    import re
     assert hasattr(monitor_tui, "__version__")
     assert isinstance(monitor_tui.__version__, str)
-    assert len(monitor_tui.__version__.split(".")) >= 3
+    assert re.match(r"^\d+\.\d+\.\d+", monitor_tui.__version__)
+    assert monitor_tui.__version__ == version.__version__
+
+
+def test_monitor_tui_build_parser_version(capsys):
+    parser = monitor_tui.build_parser()
+    with pytest.raises(SystemExit) as excinfo:
+        parser.parse_args(["--version"])
+    assert excinfo.value.code == 0
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert monitor_tui.__version__ in output
 
 
 def test_monitor_tui_cli_version_flag():
@@ -69,7 +82,7 @@ def test_monitor_tui_cli_version_flag():
     script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/monitor_tui.py'))
     result = subprocess.run([sys.executable, script_path, "--version"], capture_output=True, text=True, timeout=5)
     assert result.returncode == 0
-    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+    assert monitor_tui.__version__ in (result.stdout + result.stderr)
 
 
 def test_monitor_tui_cli_short_version_flag():
@@ -77,5 +90,5 @@ def test_monitor_tui_cli_short_version_flag():
     script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/monitor_tui.py'))
     result = subprocess.run([sys.executable, script_path, "-v"], capture_output=True, text=True, timeout=5)
     assert result.returncode == 0
-    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+    assert monitor_tui.__version__ in (result.stdout + result.stderr)
 

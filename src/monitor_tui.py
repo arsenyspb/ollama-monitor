@@ -2,6 +2,15 @@
 import time
 import os
 import sys
+import argparse
+
+try:
+    from version import __version__
+except ImportError:
+    try:
+        from src.version import __version__
+    except ImportError:
+        __version__ = "0.1.0"
 
 try:
     import plotext as plt
@@ -108,7 +117,19 @@ def draw_dashboard():
     
     plt.show()
 
+def build_parser():
+    parser = argparse.ArgumentParser(description='Ollama Monitor TUI Dashboard')
+    parser.add_argument(
+        '-v', '--version',
+        action='version',
+        version=f'%(prog)s {__version__}',
+        help="Show program's version number and exit",
+    )
+    return parser
+
 def main():
+    parser = build_parser()
+    parser.parse_args()
     print("Starting dashboard... Press Ctrl+C to stop.")
     try:
         while True:

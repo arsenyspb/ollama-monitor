@@ -72,8 +72,18 @@ To stop the proxy and restore Ollama to its default configuration:
 make tps-proxy-stop
 ```
 
+### 4. Version Check
 
-## 4. Configuration
+To check the version of any tool, use the `--version` (or `-v`) flag:
+```shell
+./src/ollama_proxy.py --version
+python3 ./src/monitor_tui.py --version
+./src/bench_monitor.sh --version
+./src/continuous_monitor.sh --version
+```
+
+
+## 5. Configuration
 
 When ran in script mode, it is configured via variables at the top of the file.
 

@@ -80,23 +80,39 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
 
 def test_ollama_proxy_version_attribute():
     import ollama_proxy
+    import version
+    import re
     assert hasattr(ollama_proxy, "__version__")
     assert isinstance(ollama_proxy.__version__, str)
-    assert len(ollama_proxy.__version__.split(".")) >= 3
+    assert re.match(r"^\d+\.\d+\.\d+", ollama_proxy.__version__)
+    assert ollama_proxy.__version__ == version.__version__
+
+
+def test_ollama_proxy_build_parser_version(capsys):
+    import ollama_proxy
+    parser = ollama_proxy.build_parser()
+    with pytest.raises(SystemExit) as excinfo:
+        parser.parse_args(["--version"])
+    assert excinfo.value.code == 0
+    captured = capsys.readouterr()
+    output = captured.out + captured.err
+    assert ollama_proxy.__version__ in output
 
 
 def test_ollama_proxy_cli_version_flag():
     import subprocess
+    import ollama_proxy
     script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/ollama_proxy.py'))
     result = subprocess.run([sys.executable, script_path, "--version"], capture_output=True, text=True, timeout=5)
     assert result.returncode == 0
-    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+    assert ollama_proxy.__version__ in (result.stdout + result.stderr)
 
 
 def test_ollama_proxy_cli_short_version_flag():
     import subprocess
+    import ollama_proxy
     script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../src/ollama_proxy.py'))
     result = subprocess.run([sys.executable, script_path, "-v"], capture_output=True, text=True, timeout=5)
     assert result.returncode == 0
-    assert "0.1.0" in result.stdout or "0.1.0" in result.stderr
+    assert ollama_proxy.__version__ in (result.stdout + result.stderr)
 
