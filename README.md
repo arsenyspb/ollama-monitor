@@ -20,6 +20,23 @@ make dashboard
 ```
 *Note: `make dashboard` starts the continuous monitor and the TPS proxy itself, so it prompts for `sudo` and reconfigures Ollama. See [Usage](#usage).*
 
+The TUI uses high-density Unicode Braille plotting (2×4 subpixels per cell, 8 subpixels total) by default, doubling the graph resolution compared to standard half-blocks within the same terminal dimensions.
+
+You can also run the TUI directly with custom per-chart timelines, refresh intervals, and density markers:
+```shell
+python3 ./src/monitor_tui.py --timeline 60 --timeline-ram 120 --refresh-ram 2.0
+```
+
+Supported options:
+- `--density`, `--marker`: Global marker density (`braille`, `fhd`, `hd`, `sd`). Default: `braille`.
+- `--density-<chart>`: Per-chart marker density (`cpu`, `gpu`, `ram`, `tps`).
+- `--timeline`: Global timeline window in seconds/points (default: `60`).
+- `--timeline-<chart>`: Per-chart timeline window (e.g., `--timeline-ram 120`, `--timeline-tps 30`).
+- `--refresh`: Global refresh interval in seconds (default: `1.0`).
+- `--refresh-<chart>`: Per-chart refresh interval (e.g., `--refresh-ram 2.0`).
+
+All parameters can also be configured via environment variables: `TUI_DENSITY`, `TIMELINE_POINTS`, `REFRESH_INTERVAL`, or per-chart `TIMELINE_CPU`, `REFRESH_RAM`, `TUI_DENSITY_TPS`, etc.
+
 ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
