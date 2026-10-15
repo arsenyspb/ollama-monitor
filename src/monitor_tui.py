@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
+import argparse
 import time
 import os
 import sys
+
+__version__ = "0.1.0"
 
 try:
     import plotext as plt
@@ -108,7 +111,22 @@ def draw_dashboard():
     
     plt.show()
 
-def main():
+def build_parser():
+    parser = argparse.ArgumentParser(description="Ollama Monitor TUI Dashboard")
+    parser.add_argument(
+        "-V",
+        "--version",
+        action="version",
+        version=f"%(prog)s {__version__}",
+        help="Show program version and exit",
+    )
+    return parser
+
+def parse_args(argv=None):
+    return build_parser().parse_args(argv)
+
+def main(argv=None):
+    parse_args(argv)
     print("Starting dashboard... Press Ctrl+C to stop.")
     try:
         while True:
