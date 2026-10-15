@@ -26,6 +26,14 @@ make dashboard
 
 ## Usage
 
+To check the version of any CLI tool or script, pass `--version` (or `-V`):
+```shell
+./src/monitor_tui.py --version
+./src/ollama_proxy.py --version
+./src/bench_monitor.sh --version
+./src/continuous_monitor.sh --version
+```
+
 ### 1. Benchmark Testing
 
 To run the benchmark, execute the script from your terminal with a run type argument.

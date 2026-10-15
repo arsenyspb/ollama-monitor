@@ -3,6 +3,13 @@
 set -e
 set -o pipefail
 
+VERSION="0.1.0"
+
+if [[ "${1:-}" == "--version" || "${1:-}" == "-V" ]]; then
+    echo "$(basename "$0") $VERSION"
+    exit 0
+fi
+
 # Setup Output
 OUTPUT_DIR="benchmark_data"
 mkdir -p "$OUTPUT_DIR"
