@@ -56,3 +56,84 @@ def test_read_data_empty_or_missing_file():
         assert model_meta == "None"
     finally:
         monitor_tui.CSV_FILE = original_csv_file
+
+
+def test_version_defined_and_valid_semver():
+    import re
+
+    assert hasattr(monitor_tui, "__version__")
+    assert isinstance(monitor_tui.__version__, str)
+    assert re.match(
+        r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$",
+        monitor_tui.__version__,
+    )
+
+
+def test_monitor_tui_version_flag(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        monitor_tui.main(["--version"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert monitor_tui.__version__ in captured.out
+
+
+def test_monitor_tui_short_version_flag(capsys):
+    with pytest.raises(SystemExit) as exc_info:
+        monitor_tui.main(["-V"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert monitor_tui.__version__ in captured.out
+
+
+@pytest.mark.parametrize("release_version", ["0.2.0", "1.0.0", "2.3.4-rc.1"])
+def test_monitor_tui_version_future_releases(monkeypatch, capsys, release_version):
+    monkeypatch.setattr(monitor_tui, "__version__", release_version)
+
+    with pytest.raises(SystemExit) as exc_info:
+        monitor_tui.main(["--version"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert release_version in captured.out
+
+
+def test_monitor_tui_cli_subprocess_version():
+    import subprocess
+
+    assert hasattr(monitor_tui, "__version__")
+    script_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../src/monitor_tui.py")
+    )
+    result = subprocess.run(
+        [sys.executable, script_path, "--version"],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert monitor_tui.__version__ in result.stdout
+
+
+@pytest.mark.parametrize(
+    "script_name", ["bench_monitor.sh", "continuous_monitor.sh"]
+)
+def test_shell_scripts_version_flag(script_name):
+    import subprocess
+
+    assert hasattr(monitor_tui, "__version__")
+    script_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../src", script_name)
+    )
+    result = subprocess.run(
+        ["bash", script_path, "--version"],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert monitor_tui.__version__ in result.stdout
+

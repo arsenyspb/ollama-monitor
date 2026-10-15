@@ -76,3 +76,72 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
     assert temp_tps.exists()
     content = temp_tps.read_text().strip()
     assert content == "7.50"
+
+
+def test_proxy_version_defined_and_matches_tui():
+    import re
+    import monitor_tui
+    import ollama_proxy
+
+    assert hasattr(ollama_proxy, "__version__")
+    assert isinstance(ollama_proxy.__version__, str)
+    assert re.match(
+        r"^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$",
+        ollama_proxy.__version__,
+    )
+    assert ollama_proxy.__version__ == monitor_tui.__version__
+
+
+def test_proxy_version_flag(capsys):
+    import ollama_proxy
+
+    with pytest.raises(SystemExit) as exc_info:
+        ollama_proxy.main(["--version"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert ollama_proxy.__version__ in captured.out
+
+
+def test_proxy_short_version_flag(capsys):
+    import ollama_proxy
+
+    with pytest.raises(SystemExit) as exc_info:
+        ollama_proxy.main(["-V"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert ollama_proxy.__version__ in captured.out
+
+
+@pytest.mark.parametrize("release_version", ["0.2.0", "1.0.0", "2.3.4-rc.1"])
+def test_proxy_version_future_releases(monkeypatch, capsys, release_version):
+    import ollama_proxy
+
+    monkeypatch.setattr(ollama_proxy, "__version__", release_version)
+
+    with pytest.raises(SystemExit) as exc_info:
+        ollama_proxy.main(["--version"])
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert release_version in captured.out
+
+
+def test_proxy_cli_subprocess_version():
+    import subprocess
+    import ollama_proxy
+
+    script_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../src/ollama_proxy.py")
+    )
+    result = subprocess.run(
+        [sys.executable, script_path, "--version"],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert ollama_proxy.__version__ in result.stdout
+
