@@ -1,0 +1,31 @@
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 6c117c6..5bb3967 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -20,6 +20,26 @@[m [mmake dashboard[m
+ ```[m
+ *Note: `make dashboard` starts the continuous monitor and the TPS proxy itself, so it prompts for `sudo` and reconfigures Ollama. See [Usage](#usage).*[m
+ [m
+[32m+[m[32mThe TUI renders high-density charts using Unicode Braille sub-character matrices (`2x4 = 8` sub-pixels per character cell, doubling the resolution of `2x2` quadrant blocks in the same `cols:chars`), a `120`-point default timeline window, and sub-step series interpolation. It dynamically adapts to terminal resizing across `zsh`, `bash`, `fish`, and POSIX `sh`.[m
+[32m+[m
+[32m+[m[32mYou can customize chart density, marker mode, and per-chart timeline refresh intervals or window sizes directly via CLI flags or environment variables:[m
+[32m+[m[32m```shell[m
+[32m+[m[32mpython3 ./src/monitor_tui.py \[m
+[32m+[m[32m  --marker braille \[m
+[32m+[m[32m  --max-points 120 \[m
+[32m+[m[32m  --density-factor 2 \[m
+[32m+[m[32m  --cpu-refresh 0.5 \[m
+[32m+[m[32m  --gpu-refresh 0.5 \[m
+[32m+[m[32m  --ram-refresh 2.0 \[m
+[32m+[m[32m  --tps-refresh 1.0 \[m
+[32m+[m[32m  --tps-window 180[m
+[32m+[m[32m```[m
+[32m+[m[32mSupported markers (`--marker` / `OLLAMA_TUI_MARKER`):[m
+[32m+[m[32m- `braille` (default): `2x4` dot matrix (`8` sub-pixels/char, supported across macOS `Terminal.app`, `iTerm2`, `Ghostty`, `Kitty`, `WezTerm`, `Alacritty`, and `xterm`)[m
+[32m+[m[32m- `fhd`: `2x3` Unicode 13.0 sextant blocks (`6` sub-pixels/char)[m
+[32m+[m[32m- `hd`: `2x2` Unicode quadrant blocks (`4` sub-pixels/char)[m
+[32m+[m[32m- `sd`: `1x1` standard full-block characters (`1` sub-pixel/char, fallback for non-UTF-8 or `TERM=dumb` shells)[m
+[32m+[m
+ ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)[m
+ *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*[m
+ [m
