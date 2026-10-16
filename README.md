@@ -23,6 +23,15 @@ make dashboard
 ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
+#### High-Density Terminal Rendering & Shell Compatibility
+
+The TUI renders charts using **Unicode Braille patterns (`U+2800`–`U+28FF`, `marker="braille"`)** by default, encoding a `2x4` dot matrix (`8` subpixels) inside every `1 col x 1 char` cell. Compared in the exact same `cols:chars` terminal dimensions:
+- **`braille` (`2x4 = 8` subpixels/cell):** **2x** the subpixel resolution and **2x** the vertical resolution of `plotext`'s `hd` quadrant blocks (`2x2 = 4` subpixels/cell), and **8x** the resolution of standard full-block characters (`sd`, `1x1 = 1` cell), with a default `120`-point timeline window (`2x` temporal density over the legacy `60`-point window). Cleanly supported across `zsh`, `bash`, `fish`, `sh`, and `tmux` in any UTF-8 terminal emulator (macOS `Terminal.app`, `iTerm2`, `Ghostty`, `Kitty`, `WezTerm`, `Alacritty`, `xterm`).
+- **`fhd` (`2x3 = 6` subpixels/cell):** Unicode 13.0 sextant blocks (`U+1FB00`–`U+1FB3B`); `1.5x` density over `hd`, selectable via `--marker fhd` on terminals with Legacy Computing font glyphs.
+- **`hd` (`2x2 = 4` subpixels/cell) & `sd` (`1x1 = 1` cell):** Selectable via `--marker hd` or `--marker sd` for legacy font environments.
+- **Dynamic resizing:** The dashboard listens for `SIGWINCH` and dynamically rescales subplots to the live terminal geometry without clamping to startup dimensions.
+
+
 
 ## Usage
 
@@ -75,11 +84,30 @@ make tps-proxy-stop
 
 ## 4. Configuration
 
+### Benchmark Script Configuration
+
 When ran in script mode, it is configured via variables at the top of the file.
 
 -   `MODEL`: The Ollama model tag to benchmark (e.g., `qwen3-coder:30b`).
 -   `PROMPT`: The input prompt for the model. As a shortcut, this is a hard-coded zero-shot prompt. For more advanced use cases, this can be externalized to be read from a file or command-line argument.
 -   `OUTPUT_DIR`: The directory where benchmark reports and logs are stored.
+
+### TUI Dashboard Configuration (`src/monitor_tui.py`)
+
+Each chart (`cpu`, `gpu`, `ram`, `tps`) supports configurable timeline windows (data points) and refresh intervals (seconds) via CLI flags or environment variables:
+
+```shell
+python3 ./src/monitor_tui.py \
+  --marker braille \
+  --window 120 --tps-window 240 \
+  --refresh 1.0 --cpu-refresh 0.5 --ram-refresh 5.0
+```
+
+-   `--marker` / `MONITOR_TUI_MARKER`: Sub-character resolution mode (`braille` [default, `2x4`], `fhd` [`2x3`], `hd` [`2x2`], `sd` [`1x1`]).
+-   `--window` / `MONITOR_TUI_MAX_POINTS`: Default timeline window in data points across all charts (default: `120`).
+-   `--cpu-window`, `--gpu-window`, `--ram-window`, `--tps-window` (or `MONITOR_TUI_<CHART>_WINDOW`): Per-chart timeline window override.
+-   `--refresh` / `MONITOR_TUI_REFRESH_INTERVAL`: Default refresh interval in seconds (default: `1.0`).
+-   `--cpu-refresh`, `--gpu-refresh`, `--ram-refresh`, `--tps-refresh` (or `MONITOR_TUI_<CHART>_REFRESH`): Per-chart refresh interval override in seconds.
 
 ## Output
 
