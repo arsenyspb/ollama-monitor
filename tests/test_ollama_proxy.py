@@ -72,7 +72,46 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
     
     # Restore original path
     ollama_proxy.TPS_FILE = original_tps_file
-    
+
     assert temp_tps.exists()
     content = temp_tps.read_text().strip()
     assert content == "7.50"
+
+
+def test_ollama_proxy_version_flag(monkeypatch, capsys, tmp_path):
+    import ollama_proxy
+
+    assert hasattr(ollama_proxy, "__version__")
+    assert isinstance(ollama_proxy.__version__, str)
+    assert ollama_proxy.__version__.strip() != ""
+
+    temp_tps = tmp_path / "tps.txt"
+    monkeypatch.setattr(ollama_proxy, "TPS_FILE", str(temp_tps))
+    monkeypatch.setattr(sys, "argv", ["ollama_proxy.py", "--version"])
+
+    with patch("ollama_proxy.socket.socket") as mock_socket:
+        with pytest.raises(SystemExit) as exc_info:
+            ollama_proxy.main()
+        mock_socket.assert_not_called()
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert ollama_proxy.__version__ in captured.out
+    assert not temp_tps.exists()
+
+
+def test_ollama_proxy_cli_version_subprocess():
+    import subprocess
+    import ollama_proxy
+
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../src/ollama_proxy.py"))
+    result = subprocess.run(
+        [sys.executable, script_path, "--version"],
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert ollama_proxy.__version__ in result.stdout
+
