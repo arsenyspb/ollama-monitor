@@ -72,8 +72,16 @@ To stop the proxy and restore Ollama to its default configuration:
 make tps-proxy-stop
 ```
 
+### 4. CLI Version
 
-## 4. Configuration
+Both Python CLI entrypoints support the `--version` flag to print their version and exit:
+```shell
+python3 ./src/ollama_proxy.py --version
+python3 ./src/monitor_tui.py --version
+```
+
+
+## 5. Configuration
 
 When ran in script mode, it is configured via variables at the top of the file.
 
