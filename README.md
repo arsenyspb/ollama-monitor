@@ -23,6 +23,33 @@ make dashboard
 ![Ollama Monitor Dashboard](img/ollama-monitor-normalized.png)
 *Example run of Mixtral 8x7B on an M4 Max with 64GB RAM during regular office load.*
 
+#### High-Density Terminal Charting & Per-Chart Refresh
+
+The TUI (`src/monitor_tui.py`) uses **Unicode Braille (`2x4` subpixel matrix = 8 subpixels per character cell)** with **2x linear series upsampling** and a **120-point default timeline window**, delivering **>= 2x effective chart resolution** in the exact same `cols:chars` footprint compared to standard `hd` (`2x2` = 4 subpixels/cell, 60-point) charts:
+
+| Marker / Protocol | Subpixel Matrix | Subpixels / Cell | Density vs `hd` | Portability (`tmux`, SSH, UTF-8 TTY) |
+|---|---|---|---|---|
+| `sd` | `1x1` full block | 1 | `0.25x` | Universal |
+| `hd` | `2x2` quadrant blocks | 4 | `1.0x` (baseline) | Universal |
+| `fhd` | `2x3` sextant blocks (`U+1FB00..`) | 6 | `1.5x` | Requires Unicode 13 legacy-computing font glyphs |
+| **`braille` (default)** | **`2x4` Unicode Braille (`U+2800..U+28FF`)** | **8** | **`2.0x` (`4.0x` with 2x upsampling)** | **Universal across UTF-8 terminals, SSH, and `tmux`** |
+| Pixel protocols (Sixel / Kitty / iTerm2) | Raster image escape sequences | Pixel-level | Terminal-specific | Non-portable across standard `tmux`/SSH sessions |
+
+Each of the four charts (`cpu`, `gpu`, `ram`, `tps`) supports independently configurable refresh intervals and window sizes, adaptive x-axis tick decimation, and automatic layout recalculation on terminal resize (`SIGWINCH`):
+
+```shell
+# Run the TUI with custom per-chart refresh intervals (seconds) and windows (points)
+python3 ./src/monitor_tui.py \
+  --refresh 1.0 \
+  --tps-refresh 0.5 --cpu-refresh 1.0 --gpu-refresh 2.0 --ram-refresh 5.0 \
+  --window 120 --tps-window 60 --ram-window 240 \
+  --marker braille --upsample 2
+
+# Inspect CLI versions without starting the TUI loop or binding proxy sockets
+python3 ./src/monitor_tui.py --version
+python3 ./src/ollama_proxy.py --version
+```
+
 
 ## Usage
 

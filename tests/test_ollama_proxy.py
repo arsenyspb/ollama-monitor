@@ -7,6 +7,9 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
 from ollama_proxy import extract_tps_from_line, forward_data
+import ollama_proxy
+import subprocess
+import socket
 
 def test_extract_tps_from_line_valid_json():
     # Arrange
@@ -76,3 +79,45 @@ def test_forward_data_openai_continuous_tps(mock_time, tmp_path):
     assert temp_tps.exists()
     content = temp_tps.read_text().strip()
     assert content == "7.50"
+
+
+def test_ollama_proxy_version_attribute():
+    assert hasattr(ollama_proxy, "__version__")
+    assert isinstance(ollama_proxy.__version__, str)
+    assert len(ollama_proxy.__version__.strip()) > 0
+
+
+def test_ollama_proxy_cli_version_flag():
+    script_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../src/ollama_proxy.py")
+    )
+    result = subprocess.run(
+        [sys.executable, script_path, "--version"],
+        capture_output=True,
+        text=True,
+        timeout=5,
+    )
+    assert result.returncode == 0
+    assert "ollama_proxy.py" in result.stdout
+    assert ollama_proxy.__version__ in result.stdout
+    assert result.stderr == ""
+
+
+def test_ollama_proxy_version_no_side_effects(monkeypatch, tmp_path, capsys):
+    fake_tps = tmp_path / "no_write_tps"
+    monkeypatch.setattr(ollama_proxy, "TPS_FILE", str(fake_tps))
+
+    def forbid_socket(*args, **kwargs):
+        raise AssertionError("socket must not be initialized when --version is passed")
+
+    monkeypatch.setattr(socket, "socket", forbid_socket)
+    monkeypatch.setattr(sys, "argv", ["ollama_proxy.py", "--version"])
+
+    with pytest.raises(SystemExit) as exc_info:
+        ollama_proxy.main()
+
+    assert exc_info.value.code == 0
+    captured = capsys.readouterr()
+    assert ollama_proxy.__version__ in captured.out
+    assert not fake_tps.exists()
+
